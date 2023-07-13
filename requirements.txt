@@ -1,0 +1,7 @@
+pytest
+black
+mypy
+ipython
+ipdb
+dacite
+coloredlogs
