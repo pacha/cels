@@ -6,8 +6,11 @@ export PYTHONPATH := project_dir
 @help:
   just --list
 
-@test:
-  pytest --capture=no tests/
+@test-all:
+  pytest --capture=no -o log_cli=false tests/
+
+@test *params:
+  pytest --capture=no -o log_cli=true {{ params }}
 
 @format:
   black {{ project_dir }}
@@ -20,8 +23,6 @@ export PYTHONPATH := project_dir
 
 run *params:
   #!/usr/bin/env python3
-  import sys
-  sys.path.append("{{ project_dir }}")
   from patchwork.cli import patchwork
   params = "{{ params }}".split()
   patchwork(params)
