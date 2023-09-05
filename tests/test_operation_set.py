@@ -1,8 +1,8 @@
 
 import pytest
 
-from patchwork.services import patch_dict
-from patchwork.errors import PatchworkInvalidPatch
+from patchwork.services import patch_dictionary
+from patchwork.exceptions import PatchworkInputError
 
 def test_operation_set_new():
     """Add a new item."""
@@ -14,7 +14,7 @@ def test_operation_set_new():
     expected = {
         "foo": 100,
     }
-    assert patch_dict(original, patch) == expected
+    assert patch_dictionary(original, patch) == expected
 
 def test_operation_set_add_to_existing():
     """Add a new item."""
@@ -28,7 +28,7 @@ def test_operation_set_add_to_existing():
         "foo": 1,
         "bar": 2,
     }
-    assert patch_dict(original, patch) == expected
+    assert patch_dictionary(original, patch) == expected
 
 def test_operation_set_new_explicit():
     """Add a new item with an explicit annotation."""
@@ -40,7 +40,7 @@ def test_operation_set_new_explicit():
     expected = {
         "foo": 100,
     }
-    assert patch_dict(original, patch) == expected
+    assert patch_dictionary(original, patch) == expected
 
 def test_operation_set_override_value():
     """Override previous value."""
@@ -53,7 +53,7 @@ def test_operation_set_override_value():
     expected = {
         "foo": 100,
     }
-    assert patch_dict(original, patch) == expected
+    assert patch_dictionary(original, patch) == expected
 
 def test_operation_set_override_value_explicit():
     """Override previous value with an explicit annotation."""
@@ -66,7 +66,7 @@ def test_operation_set_override_value_explicit():
     expected = {
         "foo": 100,
     }
-    assert patch_dict(original, patch) == expected
+    assert patch_dictionary(original, patch) == expected
 
 def test_operation_set_override_different_type():
     """Override value of different type."""
@@ -79,7 +79,7 @@ def test_operation_set_override_different_type():
     expected = {
         "foo": 100,
     }
-    assert patch_dict(original, patch) == expected
+    assert patch_dictionary(original, patch) == expected
 
 def test_operation_set_override_different_type_explicit():
     """Override value of different type with an explitic annotation."""
@@ -92,7 +92,7 @@ def test_operation_set_override_different_type_explicit():
     expected = {
         "foo": 100,
     }
-    assert patch_dict(original, patch) == expected
+    assert patch_dictionary(original, patch) == expected
 
 def test_operation_set_override_nested_value():
     """Override nested value."""
@@ -125,7 +125,7 @@ def test_operation_set_override_nested_value():
             },
         },
     }
-    assert patch_dict(original, patch) == expected
+    assert patch_dictionary(original, patch) == expected
 
 def test_operation_set_no_annotations_in_value():
     """The patch value should not have annotations in a set operation."""
@@ -140,8 +140,8 @@ def test_operation_set_no_annotations_in_value():
             },
         },
     }
-    with pytest.raises(PatchworkInvalidPatch):
-        _ = patch_dict(original, patch)
+    with pytest.raises(PatchworkInputError):
+        _ = patch_dictionary(original, patch)
 
 def test_operation_set_no_annotations_in_value_overriding():
     """The patch value should not have annotations in a set operation."""
@@ -157,5 +157,5 @@ def test_operation_set_no_annotations_in_value_overriding():
             },
         },
     }
-    with pytest.raises(PatchworkInvalidPatch):
-        _ = patch_dict(original, patch)
+    with pytest.raises(PatchworkInputError):
+        _ = patch_dictionary(original, patch)

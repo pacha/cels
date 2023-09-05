@@ -1,0 +1,45 @@
+
+import logging as log
+
+from patchwork.exceptions import PatchworkInputError
+
+# define action decorator
+# (ensures that all exceptions show the path where they happened)
+action_name_prefix_length = len("action_")
+
+def action(action_func):
+    def wrapped_func(container, key, indices, change_value, input_dict, patch, path):
+        new_path = (path + key).append(indices)
+        action_name = action_func.__name__[action_name_prefix_length:]
+        log.info(f"{new_path} {{{action_name}}}")
+        try:
+            return action_func(container, key, indices, change_value, input_dict, patch, path)
+        except PatchworkInputError as err:
+            raise PatchworkInputError(
+                f"Action: {action_name} Path: {new_path} Error: {err}"
+            )
+    return wrapped_func
+
+from .action_keep import action_keep
+from .action_set import action_set
+from .action_use import action_use
+from .action_render import action_render
+from .action_link import action_link
+from .action_patch import action_patch
+from .action_insert import action_insert
+from .action_extend import action_extend
+from .action_rename import action_rename
+from .action_delete import action_delete
+
+actions = {
+    "keep": action_keep,
+    "set": action_set,
+    "use": action_use,
+    "render": action_render,
+    "link": action_link,
+    "patch": action_patch,
+    "insert": action_insert,
+    "extend": action_extend,
+    "rename": action_rename,
+    "delete": action_delete,
+}

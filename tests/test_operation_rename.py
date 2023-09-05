@@ -1,8 +1,7 @@
 
 import pytest
 
-from patchwork.services import patch_dict
-from patchwork.errors import PatchworkInvalidPatch
+from patchwork.services import patch_dictionary
 
 def test_operation_rename():
     """Just a rename operation."""
@@ -15,7 +14,7 @@ def test_operation_rename():
     expected = {
         "bar": 1,
     }
-    assert patch_dict(original, patch) == expected
+    assert patch_dictionary(original, patch) == expected
 
 def test_operation_rename_item_with_a_list_value():
     """Rename operation of a key from an item with a list value."""
@@ -28,7 +27,7 @@ def test_operation_rename_item_with_a_list_value():
     expected = {
         "bar": [1, 2, 3],
     }
-    assert patch_dict(original, patch) == expected
+    assert patch_dictionary(original, patch) == expected
 
 def test_operation_rename_key_in_nested_structure():
     original = {
@@ -58,7 +57,7 @@ def test_operation_rename_key_in_nested_structure():
             }
         }
     }
-    assert patch_dict(original, patch) == expected
+    assert patch_dictionary(original, patch) == expected
 
 def test_operation_rename_with_non_string():
     """You can rename fields using any type."""
@@ -71,7 +70,7 @@ def test_operation_rename_with_non_string():
     expected = {
         2: 1
     }
-    assert patch_dict(original, patch) == expected
+    assert patch_dictionary(original, patch) == expected
 
 def test_operation_rename_wrong_empty_string():
     """You can only rename fields using a non-empty string."""
@@ -84,5 +83,5 @@ def test_operation_rename_wrong_empty_string():
     expected = {
         "": 1
     }
-    assert patch_dict(original, patch) == expected
+    assert patch_dictionary(original, patch) == expected
 

@@ -1,9 +1,8 @@
 
 import pytest
 
-from patchwork.models import ChangeMap
-from patchwork.services import patch_dict
-from patchwork.errors import PatchworkInvalidPatch
+from patchwork.services import patch_dictionary
+from patchwork.exceptions import PatchworkInputError
 
 def test_operation_patch_recursively():
     """Patch values recursively."""
@@ -34,7 +33,7 @@ def test_operation_patch_recursively():
             },
         },
     }
-    assert patch_dict(original, patch) == expected
+    assert patch_dictionary(original, patch) == expected
 
 def test_operation_patch_explicitly():
     """Patch values recursively."""
@@ -65,7 +64,7 @@ def test_operation_patch_explicitly():
             },
         },
     }
-    assert patch_dict(original, patch) == expected
+    assert patch_dictionary(original, patch) == expected
 
 
 def test_operation_patch_non_annotated_key_non_dict_value():
@@ -83,7 +82,7 @@ def test_operation_patch_non_annotated_key_non_dict_value():
             "bar": 1
         },
     }
-    assert patch_dict(original, patch) == expected
+    assert patch_dictionary(original, patch) == expected
 
 def test_operation_patch_non_dict_value():
     """It is not possible to patch an integer."""
@@ -95,8 +94,8 @@ def test_operation_patch_non_dict_value():
             "bar": 1
         },
     }
-    with pytest.raises(PatchworkInvalidPatch):
-        _ = patch_dict(original, patch)
+    with pytest.raises(PatchworkInputError):
+        _ = patch_dictionary(original, patch)
 
 def test_operation_patch_with_non_dict_value():
     """It is not possible to patch an integer."""
@@ -108,6 +107,6 @@ def test_operation_patch_with_non_dict_value():
     patch = {
         "foo {patch}": 1
     }
-    with pytest.raises(PatchworkInvalidPatch):
-        _ = patch_dict(original, patch)
+    with pytest.raises(PatchworkInputError):
+        _ = patch_dictionary(original, patch)
 

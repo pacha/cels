@@ -6,3 +6,8 @@ ipdb
 dacite
 coloredlogs
 typeguard
+pyyaml
+tomli
+tomli-w
+jinja2
+rich

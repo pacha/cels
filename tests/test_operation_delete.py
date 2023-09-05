@@ -1,8 +1,8 @@
 
 import pytest
 
-from patchwork.services import patch_dict
-from patchwork.errors import PatchworkInvalidPatch
+from patchwork.services import patch_dictionary
+from patchwork.exceptions import PatchworkInputError
 
 def test_operation_delete_scalar():
     """Just a delete operation."""
@@ -13,7 +13,7 @@ def test_operation_delete_scalar():
         "foo {delete}": None,
     }
     expected = {}
-    assert patch_dict(original, patch) == expected
+    assert patch_dictionary(original, patch) == expected
 
 def test_operation_delete_list():
     """Delete operation for an item with a list value."""
@@ -24,7 +24,7 @@ def test_operation_delete_list():
         "foo {delete}": None,
     }
     expected = {}
-    assert patch_dict(original, patch) == expected
+    assert patch_dictionary(original, patch) == expected
 
 def test_operation_delete_non_none_value():
     """Deletion operations can't take any value other than None."""
@@ -34,8 +34,8 @@ def test_operation_delete_non_none_value():
     patch = {
         "foo {delete}": 2,
     }
-    with pytest.raises(PatchworkInvalidPatch):
-        _ = patch_dict(original, patch)
+    with pytest.raises(PatchworkInputError):
+        _ = patch_dictionary(original, patch)
 
 def test_operation_delete_nested():
     """Delete operation in a nested structure."""
@@ -65,7 +65,7 @@ def test_operation_delete_nested():
             }
         }
     }
-    assert patch_dict(original, patch) == expected
+    assert patch_dictionary(original, patch) == expected
 
 def test_operation_delete_list_element():
     """Delete operation of a list element."""
@@ -78,7 +78,7 @@ def test_operation_delete_list_element():
     expected = {
         "foo": [1, 3],
     }
-    assert patch_dict(original, patch) == expected
+    assert patch_dictionary(original, patch) == expected
 
 def test_operation_delete_list_element_outside_bounds():
     """An outside bounds operation should raise an error"""
@@ -88,6 +88,6 @@ def test_operation_delete_list_element_outside_bounds():
     patch = {
         "foo {delete@5}": None,
     }
-    with pytest.raises(PatchworkInvalidPatch):
-        _ = patch_dict(original, patch)
+    with pytest.raises(PatchworkInputError):
+        _ = patch_dictionary(original, patch)
 

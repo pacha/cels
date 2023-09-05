@@ -1,128 +1,89 @@
-import logging as log
-from enum import Enum
 from typing import Any
+from typing import ClassVar
+from dataclasses import dataclass
 
-from typeguard import check_type
-from typeguard import TypeCheckError
+from patchwork.exceptions import PatchworkInternalError
 
-from patchwork.errors import PatchworkInternalError
-from patchwork.errors import PatchworkInvalidValueType
-
-allowed_patch_value_types = {
-    "change": list,
-    "patch": dict,
-    "set": Any,
-    "delete": None,
-    "rename": Any,
-    "insert": Any,
-    "extend": list,
-}
-
-allowed_original_value_types = {
-    "change": Any,
-    "patch": dict,
-    "set": Any,
-    "delete": Any,
-    "rename": Any,
-    "insert": list,
-    "extend": list,
-}
-
-type_names = {
-    str: "string (str)",
-    dict: "dictionary (dict)",
-    list: "list",
-    None: "None/null",
-    Any: "any",
+# unfortunately we can't pass forward-references to check_type.
+# we'll use this map to get the actual type hints.
+hints_map = {
+    "Any": Any,
+    "str": str,
+    "dict": dict,
+    "list": list,
+    "None": None,
+    "list[dict[str, Any]]": list[dict[str, Any]],
+    "str | int | bool | None": str | int | bool | None,
 }
 
 
-class Operation(str, Enum):
-    change = "change"
-    patch = "patch"
-    set = "set"
-    rename = "rename"
-    delete = "delete"
-    insert = "insert"
-    extend = "extend"
+@dataclass
+class Operation:
+    # class attributes
+    instances: ClassVar[dict[str, "Operation"]] = {}
+
+    # instance attributes
+    name: str
+    description: str
+    notes: str
+    examples: list[dict[str, str]]
+    takes_indices: bool
+    takes_underscore_index: bool
+    value_type: Any
 
     @classmethod
-    def list(cls):
-        return [element.value for element in cls]
-
-    def validate_against_patch_value(self, value: Any) -> bool:
-        return self.validate_against_value(value, allowed_patch_value_types)
-
-    def validate_against_original_value(self, value: Any) -> bool:
-        return self.validate_against_value(value, allowed_original_value_types)
-
-    def validate_against_value(self, value: Any, type_map: dict[str, Any]):
-        allowed_type = type_map[self.value]
-        try:
-            check_type(value, allowed_type)
-        except TypeCheckError:
-            raise PatchworkInvalidValueType(
-                message=f"The type of value '{value}' for operation '{self.value}' is invalid.",
-                allowed_type=type_names[allowed_type],
+    def add(
+        cls,
+        name: str,
+        description: str,
+        notes: str,
+        examples: list,
+        takes_indices: bool,
+        takes_underscore_index: bool,
+        value_type: str,
+    ) -> "Operation":
+        if not takes_indices and takes_underscore_index:
+            raise PatchworkInternalError(
+                "Operations can have 'takes_underscore_index' set to true if 'takes_indices' is set to false."
             )
+        instance = cls(
+            name,
+            description,
+            notes,
+            examples,
+            takes_indices,
+            takes_underscore_index,
+            hints_map[value_type],
+        )
+        cls.instances[name] = instance
+        return instance
 
-    def execute(self, key: Any, value: Any, change: "Change", result: dict) -> Any:
+    @classmethod
+    def get(cls, name: str) -> "Operation":
+        return cls.instances[name]
+
+    @classmethod
+    def get_all(cls) -> "list[Operation]":
+        return list(cls.instances.values())
+
+    @classmethod
+    def show_names(cls) -> "list[str]":
+        operation_names = [operation.name for operation in cls.instances.values()]
+        return ", ".join(operation_names)
+
+    @property
+    def value_type_name(self):
         try:
-            operation_method = getattr(self, f"execute_{self.value}")
-        except AttributeError:
-            raise PatchworkInternalError(f"Operation {self.value} not implemented")
-        return operation_method(key, value, change, result)
+            return self.value_type.__name__
+        except Exception:
+            return str(self.value_type)
 
-    def execute_set(self, key: Any, value: Any, change: "Change", result: dict) -> Any:
-        """Set the original item with the provided change."""
-        result[key] = change.value
-        return key
+    def __str__(self):
+        return self.name
 
-    def execute_rename(
-        self, key: Any, value: Any, change: "Change", result: dict
-    ) -> Any:
-        old_key = key
-        new_key = change.value
-        if old_key in result:
-            result[new_key] = result[old_key]
-            del result[old_key]
-        else:
-            result[new_key] = value
-        return new_key
-
-    def execute_delete(
-        self, key: Any, value: Any, change: "Change", result: dict
-    ) -> Any:
-        if change.position is not None:
-            if key not in result:
-                result[key] = value[:]
-            try:
-                del result[key][change.position]
-            except KeyError:
-                pass
-        else:
-            try:
-                del result[key]
-            except KeyError:
-                pass
-        return key
-
-    def execute_insert(
-        self, key: Any, value: Any, change: "Change", result: dict
-    ) -> Any:
-        if change.position is None:
-            result[key] = value[:] + [change.value]
-        else:
-            result[key] = value[:]
-            result[key].insert(change.position, change.value)
-        return key
-
-    def execute_extend(
-        self, key: Any, value: Any, change: "Change", result: dict
-    ) -> Any:
-        if change.position is None:
-            result[key] = value[:] + change.value
-        else:
-            result[key] = value[:]
-            result[key][change.position : change.position] = change.value
-
+    def __eq__(self, other: "Operation | str") -> bool:
+        if isinstance(other, Operation):
+            return self.name == other.name
+        elif isinstance(other, str):
+            return self.name == other
+        return False

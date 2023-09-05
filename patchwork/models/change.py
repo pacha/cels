@@ -1,71 +1,131 @@
 from typing import Any
-from textwrap import shorten
+from dataclasses import field
 from dataclasses import dataclass
 
 from dacite import from_dict
-from dacite import Config
+from dacite import DaciteError
+from typeguard import check_type
+from typeguard import TypeCheckError
 
+from .actions import actions
 from .operation import Operation
-from patchwork.errors import PatchworkInvalidPosition
-from patchwork.errors import PatchworkInvalidOperation
-from patchwork.errors import PatchworkInvalidValueType
-from patchwork.errors import PatchworkInternalError
+from patchwork.lib.value_type import value_type
+from patchwork.exceptions import PatchworkInputError
 
-list_operations = ["patch", "set", "delete", "insert", "extend"]
 list_exclusive_operations = ["insert", "extend"]
 operations_without_value = ["delete"]
 allowed_operations_for_new_keys = ["set"]
 
+list_operations = ["patch", "set", "delete", "insert", "extend"]
+valid_operation_values = {
+    "patch": dict,
+    "set": Any,
+    "delete": None,
+    "rename": Any,
+    "insert": Any,
+    "extend": list,
+    "var": Any,
+    "link": str,
+    "render": str,
+}
+
+
 @dataclass
 class Change:
-    operation: Operation
+    operation: Operation | None
     value: Any
-    position: int | None = None
+    indices: list[int | None] = field(default_factory=list)
 
-    def __init__(self, operation: Operation, value: Any, position: int | None = None):
-        # chech that the value type matches the allowed types
-        try:
-            operation.validate_against_patch_value(value)
-        except PatchworkInvalidValueType as err:
-            raise PatchworkInvalidOperation(
-                f"Can't execute operation '{operation.value}' with the value found in "
-                f"the patch dictionary ('{value}'). "
-                f"This operation requires a patch value of type '{err.allowed_type}' "
-                f"instead of type '{type(value).__name__ if value is not None else 'None/null'}'."
-            )
+    def __init__(self, operation: Operation | None, value: Any = None, indices: list[int | None] = []):
 
-        # check that 'position' is only provided for list operations
-        if not isinstance(position, type(None)):
-            if isinstance(position, int):
-                if operation.value not in list_operations:
-                    raise PatchworkInvalidPosition(
-                        f"Position field {position} can't be used for operation {operation}. "
-                        f"It is only allowed for operations {list_operations}."
-                    )
+        if operation:
+            # chech that the value type matches the allowed types
+            try:
+                check_type(value, operation.value_type)
+            except TypeCheckError:
+                raise PatchworkInputError(
+                    f"Can't execute operation '{operation}' with the value found in "
+                    f"the patch dictionary ('{value}'). "
+                    f"This operation requires a patch value of type '{operation.value_type_name}' "
+                    f"instead of type '{value_type(value)}'."
+                )
+            # check that the operation takes indices
+            if not operation.takes_indices and indices:
+                raise PatchworkInputError(
+                    f"Operation '{operation}' can't take indices '{indices}'."
+                )
+
         # set fields
         self.operation = operation
         self.value = value
-        self.position = position
+        self.indices = indices
 
     @classmethod
     def from_dict(cls, data: dict):
         """Create instance from dictionary"""
+        # get operation
+        try:
+            operation_name = data["operation"]
+        except KeyError:
+            raise PatchworkInputError(
+                f"Missing 'operation' key in dictionary part of a 'change' list: {data}"
+            )
+        try:
+            operation = Operation.get(operation_name)
+        except KeyError:
+            raise PatchworkInputError(
+                f"The operation '{operation_name}' provided in the change list is not valid. "
+                f"Valid operations are: {Operation.show_names()}."
+            )
 
         # for some operations, it is fine to not to specify value
-        value_can_be_missing = "operation" in data and data["operation"] in operations_without_value
         value_missing = "value" not in data
-        if value_can_be_missing and value_missing:
-            data["value"] = None
+        if value_missing:
+            if operation.value_type is not None:
+                raise PatchworkInputError(
+                    f"Missing 'value' key in dictionary part of a 'change' list: {data}"
+                )
+            else:
+                data["value"] = None
 
-        return from_dict(cls, data, config=Config(cast=[Operation]))
-
-    def get_suffix(self):
-        if self.position:
-            return f"[{self.position}]"
-        elif self.operation.value in list_exclusive_operations:
-            return "[]"
-        else:
-            return ""
+        # create change object
+        try:
+            data["operation"] = operation
+            obj = from_dict(cls, data)
+        except DaciteError as err:
+            raise PatchworkInputError(err)
+        return obj
 
     def __str__(self):
-        return f"{self.operation.value} | value: {shorten(str(self.value), width=40, placeholder=' ...')}"
+        if not self.operation:
+            return ""
+        index_str = ("@" + ",".join([str(index) for index in self.indices])) if self.indices else ""
+        return f"{{{self.operation.name}{index_str}}}"
+
+    def apply(self, output_dict, key, input_dict, patch, path):
+        """Apply operation at key."""
+
+        # find operation
+        if self.operation:
+            operation_name = self.operation.name
+        else:
+            try:
+                input_value_is_dict = isinstance(output_dict[key], dict)
+            except KeyError:
+                input_value_is_dict = False
+            patch_value_is_dict = isinstance(self.value, dict)
+            operation_name = 'patch' if input_value_is_dict and patch_value_is_dict else 'set'
+
+        # find action
+        action = actions[operation_name]
+
+        # apply action
+        action(
+            container=output_dict,
+            key=key,
+            indices=self.indices,
+            change_value=self.value,
+            input_dict=input_dict,
+            patch=patch,
+            path=path,
+        )

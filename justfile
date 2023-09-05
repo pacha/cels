@@ -10,7 +10,7 @@ export PYTHONPATH := project_dir
   pytest --capture=no -o log_cli=false tests/
 
 @test *params:
-  pytest --capture=no -o log_cli=true {{ params }}
+  pytest -x --capture=no -o log_cli=true {{ params }}
 
 @format:
   black {{ project_dir }}

@@ -1,10 +1,8 @@
 
-import logging as log
 import pytest
 
-from patchwork.models import ChangeMap
-from patchwork.services import patch_dict
-from patchwork.errors import PatchworkInvalidPatch
+from patchwork.services import patch_dictionary
+from patchwork.exceptions import PatchworkInputError
 
 def test_operation_extend_at_start():
     """Extend at the start of a list."""
@@ -17,7 +15,7 @@ def test_operation_extend_at_start():
     expected = {
         "foo": ["a", "b", 1, 2, 3, 4, 5],
     }
-    assert patch_dict(original, patch) == expected
+    assert patch_dictionary(original, patch) == expected
 
 def test_operation_extend_in_between():
     """Extend in the middle of a list."""
@@ -30,7 +28,7 @@ def test_operation_extend_in_between():
     expected = {
         "foo": [1, 2, 3, "a", "b", 4, 5],
     }
-    assert patch_dict(original, patch) == expected
+    assert patch_dictionary(original, patch) == expected
 
 def test_operation_extend_at_end():
     """Extend at the end of a list."""
@@ -43,7 +41,7 @@ def test_operation_extend_at_end():
     expected = {
         "foo": [1, 2, 3, 4, 5, "a", "b"],
     }
-    assert patch_dict(original, patch) == expected
+    assert patch_dictionary(original, patch) == expected
 
 def test_operation_extend_negative_index():
     """Extend using a negative index."""
@@ -56,7 +54,7 @@ def test_operation_extend_negative_index():
     expected = {
         "foo": [1, 2, 3, 4, "a", "b", 5],
     }
-    assert patch_dict(original, patch) == expected
+    assert patch_dictionary(original, patch) == expected
 
 
 def test_operation_extend_negative_index_again():
@@ -70,7 +68,7 @@ def test_operation_extend_negative_index_again():
     expected = {
         "foo": [1, 2, "a", "b", 3, 4, 5],
     }
-    assert patch_dict(original, patch) == expected
+    assert patch_dictionary(original, patch) == expected
 
 def test_operation_extend_empty_list():
     """Extend an empty list."""
@@ -83,7 +81,7 @@ def test_operation_extend_empty_list():
     expected = {
         "foo": ["a", "b"],
     }
-    assert patch_dict(original, patch) == expected
+    assert patch_dictionary(original, patch) == expected
 
 def test_operation_extend_empty_list_with_index():
     """Extend an empty list using an index."""
@@ -96,7 +94,7 @@ def test_operation_extend_empty_list_with_index():
     expected = {
         "foo": ["a", "b"],
     }
-    assert patch_dict(original, patch) == expected
+    assert patch_dictionary(original, patch) == expected
 
 def test_operation_extend_empty_list_with_negative_index():
     """Extend an empty list using a negative index."""
@@ -106,10 +104,8 @@ def test_operation_extend_empty_list_with_negative_index():
     patch = {
         "foo {extend@-1}": ["a", "b"],
     }
-    expected = {
-        "foo": ["a", "b"],
-    }
-    assert patch_dict(original, patch) == expected
+    with pytest.raises(PatchworkInputError):
+        _ = patch_dictionary(original, patch)
 
 def test_operation_extend_empty_list_with_wrong_index():
     """Extend an empty list using a wrong index."""
@@ -119,8 +115,8 @@ def test_operation_extend_empty_list_with_wrong_index():
     patch = {
         "foo {extend@1}": ["a", "b"],
     }
-    with pytest.raises(PatchworkInvalidPatch):
-        _ = patch_dict(original, patch)
+    with pytest.raises(PatchworkInputError):
+        _ = patch_dictionary(original, patch)
 
 def test_operation_extend_empty_list_with_empty_list():
     """Extend an empty list with an empty list."""
@@ -133,7 +129,7 @@ def test_operation_extend_empty_list_with_empty_list():
     expected = {
         "foo": [],
     }
-    assert patch_dict(original, patch) == expected
+    assert patch_dictionary(original, patch) == expected
 
 def test_operation_extend_out_of_bounds():
     """Extend with an out-of-bounds position."""
@@ -143,8 +139,8 @@ def test_operation_extend_out_of_bounds():
     patch = {
         "foo {extend@5}": ["a", "b"],
     }
-    with pytest.raises(PatchworkInvalidPatch):
-        _ = patch_dict(original, patch)
+    with pytest.raises(PatchworkInputError):
+        _ = patch_dictionary(original, patch)
 
 def test_operation_extend_out_of_bounds_negative_index():
     """Extend with an out-of-bounds position."""
@@ -154,8 +150,8 @@ def test_operation_extend_out_of_bounds_negative_index():
     patch = {
         "foo {extend@-6}": ["a", "b"],
     }
-    with pytest.raises(PatchworkInvalidPatch):
-        _ = patch_dict(original, patch)
+    with pytest.raises(PatchworkInputError):
+        _ = patch_dictionary(original, patch)
 
 def test_operation_extend_with_non_list():
     """Extend with an out-of-bounds position."""
@@ -165,6 +161,6 @@ def test_operation_extend_with_non_list():
     patch = {
         "foo {extend@2}": ["a", "b"],
     }
-    with pytest.raises(PatchworkInvalidPatch):
-        _ = patch_dict(original, patch)
+    with pytest.raises(PatchworkInputError):
+        _ = patch_dictionary(original, patch)
 
