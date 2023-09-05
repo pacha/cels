@@ -1,66 +1,55 @@
-
 import pytest
 
 from patchwork.services import patch_dictionary
 from patchwork.exceptions import PatchworkInputError
+
 
 def test_operation_patch_recursively():
     """Patch values recursively."""
     original = {
         "foo": {
             "bar": {
-                "baz": {
-                    "bat": 1
-                },
+                "baz": {"bat": 1},
             },
         },
     }
     patch = {
         "foo": {
             "bar": {
-                "baz": {
-                    "bat": 100
-                },
+                "baz": {"bat": 100},
             },
         },
     }
     expected = {
         "foo": {
             "bar": {
-                "baz": {
-                    "bat": 100
-                },
+                "baz": {"bat": 100},
             },
         },
     }
     assert patch_dictionary(original, patch) == expected
+
 
 def test_operation_patch_explicitly():
     """Patch values recursively."""
     original = {
         "foo": {
             "bar": {
-                "baz": {
-                    "bat": 1
-                },
+                "baz": {"bat": 1},
             },
         },
     }
     patch = {
         "foo {patch}": {
             "bar {patch}": {
-                "baz {patch}": {
-                    "bat": 100
-                },
+                "baz {patch}": {"bat": 100},
             },
         },
     }
     expected = {
         "foo": {
             "bar": {
-                "baz": {
-                    "bat": 100
-                },
+                "baz": {"bat": 100},
             },
         },
     }
@@ -69,44 +58,31 @@ def test_operation_patch_explicitly():
 
 def test_operation_patch_non_annotated_key_non_dict_value():
     """Non annotated key whose original value is not a dict yields a 'set' operation."""
-    original = {
-        "foo": 1
-    }
+    original = {"foo": 1}
     patch = {
-        "foo": {
-            "bar": 1
-        },
+        "foo": {"bar": 1},
     }
     expected = {
-        "foo": {
-            "bar": 1
-        },
+        "foo": {"bar": 1},
     }
     assert patch_dictionary(original, patch) == expected
 
+
 def test_operation_patch_non_dict_value():
     """It is not possible to patch an integer."""
-    original = {
-        "foo": 1
-    }
+    original = {"foo": 1}
     patch = {
-        "foo {patch}": {
-            "bar": 1
-        },
+        "foo {patch}": {"bar": 1},
     }
     with pytest.raises(PatchworkInputError):
         _ = patch_dictionary(original, patch)
+
 
 def test_operation_patch_with_non_dict_value():
     """It is not possible to patch an integer."""
     original = {
-        "foo": {
-            "bar": 1
-        },
+        "foo": {"bar": 1},
     }
-    patch = {
-        "foo {patch}": 1
-    }
+    patch = {"foo {patch}": 1}
     with pytest.raises(PatchworkInputError):
         _ = patch_dictionary(original, patch)
-

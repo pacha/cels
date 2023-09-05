@@ -1,8 +1,8 @@
-
 import pytest
 
 from patchwork.services import patch_dictionary
 from patchwork.exceptions import PatchworkInputError
+
 
 def test_operation_delete_scalar():
     """Just a delete operation."""
@@ -15,6 +15,7 @@ def test_operation_delete_scalar():
     expected = {}
     assert patch_dictionary(original, patch) == expected
 
+
 def test_operation_delete_list():
     """Delete operation for an item with a list value."""
     original = {
@@ -25,6 +26,7 @@ def test_operation_delete_list():
     }
     expected = {}
     assert patch_dictionary(original, patch) == expected
+
 
 def test_operation_delete_non_none_value():
     """Deletion operations can't take any value other than None."""
@@ -37,35 +39,14 @@ def test_operation_delete_non_none_value():
     with pytest.raises(PatchworkInputError):
         _ = patch_dictionary(original, patch)
 
+
 def test_operation_delete_nested():
     """Delete operation in a nested structure."""
-    original = {
-        "foo": {
-            "bar": {
-                "baz": {
-                    "bat": ""
-                }
-            }
-        }
-    }
-    patch = {
-        "foo": {
-            "bar": {
-                "baz": {
-                    "bat {delete}": None
-                }
-            }
-        }
-    }
-    expected = {
-        "foo": {
-            "bar": {
-                "baz": {
-                }
-            }
-        }
-    }
+    original = {"foo": {"bar": {"baz": {"bat": ""}}}}
+    patch = {"foo": {"bar": {"baz": {"bat {delete}": None}}}}
+    expected = {"foo": {"bar": {"baz": {}}}}
     assert patch_dictionary(original, patch) == expected
+
 
 def test_operation_delete_list_element():
     """Delete operation of a list element."""
@@ -80,6 +61,7 @@ def test_operation_delete_list_element():
     }
     assert patch_dictionary(original, patch) == expected
 
+
 def test_operation_delete_list_element_outside_bounds():
     """An outside bounds operation should raise an error"""
     original = {
@@ -90,4 +72,3 @@ def test_operation_delete_list_element_outside_bounds():
     }
     with pytest.raises(PatchworkInputError):
         _ = patch_dictionary(original, patch)
-

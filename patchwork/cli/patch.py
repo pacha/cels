@@ -164,11 +164,10 @@ def patchwork_patch(
 
     # save result
     try:
-        with click.open_file(output_file, 'w') as f:
+        with click.open_file(output_file, "w") as f:
             f.write(output_text)
     except OSError as err:
         log.error(f"Error found when saving output file: {err}")
         sys.exit(3)
     else:
         log.debug("Done.")
-

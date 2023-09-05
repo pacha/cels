@@ -1,8 +1,8 @@
-
 from patchwork.models import Path
 from patchwork.lib.copy_on_write import safe_traverse
 from patchwork.lib.copy_on_write import safe_set
 from . import action
+
 
 @action
 def action_link(output_dict, key, indices, change_value, input_dict, patch, path):

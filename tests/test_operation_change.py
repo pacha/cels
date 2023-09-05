@@ -1,4 +1,3 @@
-
 import pytest
 
 from patchwork.services import patch_dictionary
@@ -19,6 +18,7 @@ def test_operation_change_wrong_value():
     with pytest.raises(PatchworkInputError):
         _ = patch_dictionary(input, patch)
 
+
 def test_operation_change_wrong_operation():
     """The value in a change operation must be a list."""
     input = {
@@ -33,6 +33,7 @@ def test_operation_change_wrong_operation():
     }
     with pytest.raises(PatchworkInputError):
         _ = patch_dictionary(input, patch)
+
 
 def test_operation_change_delete_after_set():
     """Multiple operations for one key."""
@@ -50,9 +51,9 @@ def test_operation_change_delete_after_set():
             },
         ]
     }
-    expected = {
-    }
+    expected = {}
     assert patch_dictionary(input, patch) == expected
+
 
 def test_operation_change_set_after_delete():
     """Multiple operations for one key."""
@@ -75,6 +76,7 @@ def test_operation_change_set_after_delete():
     }
     assert patch_dictionary(input, patch) == expected
 
+
 def test_operation_change_set_after_rename():
     """Multiple operations for one key."""
     input = {
@@ -96,6 +98,7 @@ def test_operation_change_set_after_rename():
         "bar": 2,
     }
     assert patch_dictionary(input, patch) == expected
+
 
 def test_operation_change_patch_after_rename():
     """Multiple operations for one key."""

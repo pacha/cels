@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from patchwork import default
 from patchwork.exceptions import PatchworkInputError
 
+
 @dataclass
 class AnnotationConfig:
     separator: str
@@ -18,7 +19,7 @@ class AnnotationConfig:
         separator: str = default.separator,
         left_marker: str = default.left_marker,
         index_marker: str = default.index_marker,
-        right_marker: str = default.right_marker
+        right_marker: str = default.right_marker,
     ):
         # components
         self.separator = re.escape(separator)
@@ -27,7 +28,9 @@ class AnnotationConfig:
         self.right_marker = re.escape(right_marker)
 
         # annotation regex
-        pattern = f"^(.+){ self.separator }{ self.left_marker }(.+){ self.right_marker }$"
+        pattern = (
+            f"^(.+){ self.separator }{ self.left_marker }(.+){ self.right_marker }$"
+        )
         self.regex = re.compile(pattern)
 
     def check_no_annotations(self, value: Any) -> None:

@@ -36,8 +36,12 @@ class Change:
     value: Any
     indices: list[int | None] = field(default_factory=list)
 
-    def __init__(self, operation: Operation | None, value: Any = None, indices: list[int | None] = []):
-
+    def __init__(
+        self,
+        operation: Operation | None,
+        value: Any = None,
+        indices: list[int | None] = [],
+    ):
         if operation:
             # chech that the value type matches the allowed types
             try:
@@ -99,7 +103,11 @@ class Change:
     def __str__(self):
         if not self.operation:
             return ""
-        index_str = ("@" + ",".join([str(index) for index in self.indices])) if self.indices else ""
+        index_str = (
+            ("@" + ",".join([str(index) for index in self.indices]))
+            if self.indices
+            else ""
+        )
         return f"{{{self.operation.name}{index_str}}}"
 
     def apply(self, output_dict, key, input_dict, patch, path):
@@ -114,7 +122,9 @@ class Change:
             except KeyError:
                 input_value_is_dict = False
             patch_value_is_dict = isinstance(self.value, dict)
-            operation_name = 'patch' if input_value_is_dict and patch_value_is_dict else 'set'
+            operation_name = (
+                "patch" if input_value_is_dict and patch_value_is_dict else "set"
+            )
 
         # find action
         action = actions[operation_name]

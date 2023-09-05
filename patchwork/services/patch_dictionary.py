@@ -1,4 +1,3 @@
-
 import logging as log
 
 from patchwork.models import Path
@@ -9,6 +8,7 @@ from patchwork.exceptions import PatchworkActionPatch
 from patchwork.exceptions import PatchworkActionRename
 
 from patchwork import default
+
 
 def patch_dictionary(
     input_dict: dict,
@@ -24,15 +24,18 @@ def patch_dictionary(
         parent_patch=None,
         input_dict=input_dict,
         patch_dict=patch_dict,
-        annotation_config=AnnotationConfig(separator, left_marker, index_marker, right_marker)
+        annotation_config=AnnotationConfig(
+            separator, left_marker, index_marker, right_marker
+        ),
     )
+
 
 def patch_dictionary_rec(
     path: Path,
     parent_patch: Patch,
     input_dict: dict,
     patch_dict: dict,
-    annotation_config: AnnotationConfig
+    annotation_config: AnnotationConfig,
 ) -> dict:
     """Patch a dictionary (recursive function)."""
 
@@ -44,7 +47,6 @@ def patch_dictionary_rec(
 
     # process keys in input order
     for key, location in patch.get_keys(input_dict):
-
         # output dict value is only initialized if key in input dict
         if location != KeyLocation.only_patch:
             output_dict[key] = input_dict[key]
@@ -64,7 +66,7 @@ def patch_dictionary_rec(
                     parent_patch=patch,
                     input_dict=exc.input_dict,
                     patch_dict=exc.patch_dict,
-                    annotation_config=annotation_config
+                    annotation_config=annotation_config,
                 )
             except PatchworkActionRename:
                 output_dict[change.value] = output_dict[key]

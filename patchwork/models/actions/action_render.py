@@ -1,4 +1,3 @@
-
 from jinja2 import Template
 from jinja2 import TemplateError
 
@@ -6,6 +5,7 @@ from patchwork.exceptions import PatchworkInputError
 from patchwork.lib.copy_on_write import safe_set
 from patchwork.lib.copy_on_write import safe_traverse
 from . import action
+
 
 @action
 def action_render(output_dict, key, indices, change_value, input_dict, patch, path):

@@ -1,4 +1,3 @@
-
 from typing import Any
 from dataclasses import dataclass
 
@@ -15,7 +14,6 @@ class AnnotatedKey:
     annotation: Annotation | None
 
     def __init__(self, raw_key, annotation_config: AnnotationConfig):
-
         # check if the key is not a string
         if not isinstance(raw_key, str):
             self.key = raw_key
@@ -32,9 +30,8 @@ class AnnotatedKey:
         # set attributes
         self.key = annotation_data.group(1)
         try:
-            self.annotation = Annotation(annotation_data.group(2), index_marker=annotation_config.index_marker)
-        except PatchworkInputError as err:
-            raise PatchworkInputError(
-                f"Invalid annotated key '{self.key}' > {err}"
+            self.annotation = Annotation(
+                annotation_data.group(2), index_marker=annotation_config.index_marker
             )
-
+        except PatchworkInputError as err:
+            raise PatchworkInputError(f"Invalid annotated key '{self.key}' > {err}")

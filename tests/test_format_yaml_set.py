@@ -1,190 +1,237 @@
-
 from inspect import cleandoc
 from patchwork import patch_yaml
 
-def test_yaml_set0():
 
-    input = cleandoc("""
-    """)
-    patch = cleandoc("""
-    """)
-    result = cleandoc("""
+def test_yaml_set0():
+    input = cleandoc(
+        """
+    """
+    )
+    patch = cleandoc(
+        """
+    """
+    )
+    result = cleandoc(
+        """
     {}
-    """)
+    """
+    )
 
     output = patch_yaml(input, patch).strip()
     assert output == result
+
 
 def test_yaml_set1():
-
-    input = cleandoc("""
-
-    foo: 1
-
-    """)
-    patch = cleandoc("""
-    """)
-    result = cleandoc("""
+    input = cleandoc(
+        """
 
     foo: 1
 
-    """)
+    """
+    )
+    patch = cleandoc(
+        """
+    """
+    )
+    result = cleandoc(
+        """
+
+    foo: 1
+
+    """
+    )
 
     output = patch_yaml(input, patch).strip()
     assert output == result
 
-def test_yaml_set2():
 
-    input = cleandoc("""
+def test_yaml_set2():
+    input = cleandoc(
+        """
 
     foo: 1
 
-    """)
-    patch = cleandoc("""
+    """
+    )
+    patch = cleandoc(
+        """
 
     foo: 2
 
-    """)
-    result = cleandoc("""
+    """
+    )
+    result = cleandoc(
+        """
 
     foo: 2
 
-    """)
+    """
+    )
 
     output = patch_yaml(input, patch).strip()
     assert output == result
 
 
 def test_yaml_set3():
-
-    input = cleandoc("""
+    input = cleandoc(
+        """
 
     foo: 1
     bar: 2
 
-    """)
-    patch = cleandoc("""
+    """
+    )
+    patch = cleandoc(
+        """
 
     foo: 1
     baz: 3
 
-    """)
-    result = cleandoc("""
+    """
+    )
+    result = cleandoc(
+        """
 
     foo: 1
     bar: 2
     baz: 3
 
-    """)
+    """
+    )
 
     output = patch_yaml(input, patch).strip()
     assert output == result
 
-def test_yaml_set4():
 
-    input = cleandoc("""
+def test_yaml_set4():
+    input = cleandoc(
+        """
 
     foo:
       bar: 1
 
-    """)
-    patch = cleandoc("""
+    """
+    )
+    patch = cleandoc(
+        """
 
     foo:
       bar: 2
 
-    """)
-    result = cleandoc("""
+    """
+    )
+    result = cleandoc(
+        """
 
     foo:
       bar: 2
 
-    """)
+    """
+    )
 
     output = patch_yaml(input, patch).strip()
     assert output == result
 
-def test_yaml_set5():
 
-    input = cleandoc("""
+def test_yaml_set5():
+    input = cleandoc(
+        """
 
     foo:
       bar:
         baz: 1
 
-    """)
-    patch = cleandoc("""
+    """
+    )
+    patch = cleandoc(
+        """
 
     foo:
       bar:
         baz: 2
 
-    """)
-    result = cleandoc("""
+    """
+    )
+    result = cleandoc(
+        """
 
     foo:
       bar:
         baz: 2
 
-    """)
+    """
+    )
 
     output = patch_yaml(input, patch).strip()
     assert output == result
 
-def test_yaml_set6():
 
-    input = cleandoc("""
+def test_yaml_set6():
+    input = cleandoc(
+        """
 
     my_list:
       - foo
       - bar
       - baz
 
-    """)
-    patch = cleandoc("""
+    """
+    )
+    patch = cleandoc(
+        """
 
     my_list: 100
 
-    """)
-    result = cleandoc("""
+    """
+    )
+    result = cleandoc(
+        """
 
     my_list: 100
 
-    """)
+    """
+    )
 
     output = patch_yaml(input, patch).strip()
     assert output == result
 
-def test_yaml_set7():
 
-    input = cleandoc("""
+def test_yaml_set7():
+    input = cleandoc(
+        """
 
     my_list:
     - foo
     - bar
     - baz
 
-    """)
-    patch = cleandoc("""
+    """
+    )
+    patch = cleandoc(
+        """
 
     my_list {set@1}: 100
 
-    """)
-    result = cleandoc("""
+    """
+    )
+    result = cleandoc(
+        """
 
     my_list:
     - foo
     - 100
     - baz
 
-    """)
+    """
+    )
 
     output = patch_yaml(input, patch).strip()
     assert output == result
 
-def test_yaml_set8():
 
-    input = cleandoc("""
+def test_yaml_set8():
+    input = cleandoc(
+        """
 
     my_list:
     - foo
@@ -193,13 +240,17 @@ def test_yaml_set8():
       - three
     - baz
 
-    """)
-    patch = cleandoc("""
+    """
+    )
+    patch = cleandoc(
+        """
 
     my_list {set@1,1}: 100
 
-    """)
-    result = cleandoc("""
+    """
+    )
+    result = cleandoc(
+        """
 
     my_list:
     - foo
@@ -208,14 +259,16 @@ def test_yaml_set8():
       - three
     - baz
 
-    """)
+    """
+    )
 
     output = patch_yaml(input, patch).strip()
     assert output == result
 
-def test_yaml_set9():
 
-    input = cleandoc("""
+def test_yaml_set9():
+    input = cleandoc(
+        """
 
     my_list:
     - foo
@@ -224,13 +277,17 @@ def test_yaml_set9():
       - three
     - baz
 
-    """)
-    patch = cleandoc("""
+    """
+    )
+    patch = cleandoc(
+        """
 
     my_list {set@1,-2}: 100
 
-    """)
-    result = cleandoc("""
+    """
+    )
+    result = cleandoc(
+        """
 
     my_list:
     - foo
@@ -239,14 +296,16 @@ def test_yaml_set9():
       - three
     - baz
 
-    """)
+    """
+    )
 
     output = patch_yaml(input, patch).strip()
     assert output == result
 
-def test_yaml_set9():
 
-    input = cleandoc("""
+def test_yaml_set9():
+    input = cleandoc(
+        """
 
     foo:
       bar: 1
@@ -261,16 +320,20 @@ def test_yaml_set9():
     - baz
     spam: {"eggs": null}
 
-    """)
-    patch = cleandoc("""
+    """
+    )
+    patch = cleandoc(
+        """
 
     foo:
       baz: 100
     my_list {set@1, -2, 2}: 100
     spam: {"eggs": "a lot"}
 
-    """)
-    result = cleandoc("""
+    """
+    )
+    result = cleandoc(
+        """
 
     foo:
       bar: 1
@@ -286,8 +349,8 @@ def test_yaml_set9():
     spam:
       eggs: a lot
 
-    """)
+    """
+    )
 
     output = patch_yaml(input, patch).strip()
     assert output == result
-

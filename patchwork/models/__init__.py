@@ -1,4 +1,3 @@
-
 from .key_location import KeyLocation
 from .path import Path
 from .annotated_key import AnnotatedKey
@@ -16,4 +15,3 @@ operations_data_path = data_path / "operations.yaml"
 operations_list = yaml.safe_load(operations_data_path.read_text())
 for opertation_item in operations_list["operations"]:
     Operation.add(**opertation_item)
-

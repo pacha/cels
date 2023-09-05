@@ -1,13 +1,12 @@
-
 import pytest
 
 from patchwork.services import patch_dictionary
 from patchwork.exceptions import PatchworkInputError
 
+
 def test_operation_set_new():
     """Add a new item."""
-    original = {
-    }
+    original = {}
     patch = {
         "foo": 100,
     }
@@ -15,6 +14,7 @@ def test_operation_set_new():
         "foo": 100,
     }
     assert patch_dictionary(original, patch) == expected
+
 
 def test_operation_set_add_to_existing():
     """Add a new item."""
@@ -30,10 +30,10 @@ def test_operation_set_add_to_existing():
     }
     assert patch_dictionary(original, patch) == expected
 
+
 def test_operation_set_new_explicit():
     """Add a new item with an explicit annotation."""
-    original = {
-    }
+    original = {}
     patch = {
         "foo {set}": 100,
     }
@@ -41,6 +41,7 @@ def test_operation_set_new_explicit():
         "foo": 100,
     }
     assert patch_dictionary(original, patch) == expected
+
 
 def test_operation_set_override_value():
     """Override previous value."""
@@ -55,6 +56,7 @@ def test_operation_set_override_value():
     }
     assert patch_dictionary(original, patch) == expected
 
+
 def test_operation_set_override_value_explicit():
     """Override previous value with an explicit annotation."""
     original = {
@@ -67,6 +69,7 @@ def test_operation_set_override_value_explicit():
         "foo": 100,
     }
     assert patch_dictionary(original, patch) == expected
+
 
 def test_operation_set_override_different_type():
     """Override value of different type."""
@@ -81,6 +84,7 @@ def test_operation_set_override_different_type():
     }
     assert patch_dictionary(original, patch) == expected
 
+
 def test_operation_set_override_different_type_explicit():
     """Override value of different type with an explitic annotation."""
     original = {
@@ -94,24 +98,21 @@ def test_operation_set_override_different_type_explicit():
     }
     assert patch_dictionary(original, patch) == expected
 
+
 def test_operation_set_override_nested_value():
     """Override nested value."""
     original = {
         "spam": "eggs",
         "foo": {
             "bar": {
-                "baz": {
-                    "bat": 1
-                },
+                "baz": {"bat": 1},
             },
         },
     }
     patch = {
         "foo": {
             "bar": {
-                "baz": {
-                    "bat": 100
-                },
+                "baz": {"bat": 100},
             },
         },
     }
@@ -119,42 +120,31 @@ def test_operation_set_override_nested_value():
         "spam": "eggs",
         "foo": {
             "bar": {
-                "baz": {
-                    "bat": 100
-                },
+                "baz": {"bat": 100},
             },
         },
     }
     assert patch_dictionary(original, patch) == expected
 
+
 def test_operation_set_no_annotations_in_value():
     """The patch value should not have annotations in a set operation."""
-    original = {
-        "this": {
-        }
-    }
+    original = {"this": {}}
     patch = {
         "this": {
-            "foo {set}": {
-                "bar {set}": 2
-            },
+            "foo {set}": {"bar {set}": 2},
         },
     }
     with pytest.raises(PatchworkInputError):
         _ = patch_dictionary(original, patch)
 
+
 def test_operation_set_no_annotations_in_value_overriding():
     """The patch value should not have annotations in a set operation."""
-    original = {
-        "this": {
-            "foo": 1
-        }
-    }
+    original = {"this": {"foo": 1}}
     patch = {
         "this": {
-            "foo {set}": {
-                "bar {set}": 2
-            },
+            "foo {set}": {"bar {set}": 2},
         },
     }
     with pytest.raises(PatchworkInputError):

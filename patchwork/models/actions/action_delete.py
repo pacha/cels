@@ -1,4 +1,3 @@
-
 from patchwork.lib.copy_on_write import safe_traverse
 from patchwork.lib.copy_on_write import safe_del
 from . import action

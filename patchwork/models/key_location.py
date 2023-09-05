@@ -1,5 +1,5 @@
-
 from enum import Enum
+
 
 class KeyLocation(Enum):
     only_input = 1

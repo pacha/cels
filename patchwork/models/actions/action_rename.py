@@ -1,7 +1,7 @@
-
 from patchwork.exceptions import PatchworkInputError
 from patchwork.exceptions import PatchworkActionRename
 from . import action
+
 
 @action
 def action_rename(output_dict, key, indices, change_value, input_dict, patch, path):

@@ -1,8 +1,8 @@
-
 import pytest
 
 from patchwork.services import patch_dictionary
 from patchwork.exceptions import PatchworkInputError
+
 
 def test_operation_insert_at_start():
     """Insert element at the start of a list."""
@@ -17,6 +17,7 @@ def test_operation_insert_at_start():
     }
     assert patch_dictionary(original, patch) == expected
 
+
 def test_operation_insert_in_between():
     """Insert element in the middle of a list."""
     original = {
@@ -29,6 +30,7 @@ def test_operation_insert_in_between():
         "foo": [1, 2, 3, 100, 4, 5],
     }
     assert patch_dictionary(original, patch) == expected
+
 
 def test_operation_insert_at_end():
     """Insert element at the end of a list."""
@@ -43,6 +45,7 @@ def test_operation_insert_at_end():
     }
     assert patch_dictionary(original, patch) == expected
 
+
 def test_operation_insert_negative_index():
     """Insert element using a negative index."""
     original = {
@@ -55,6 +58,7 @@ def test_operation_insert_negative_index():
         "foo": [1, 2, 3, 4, 100, 5],
     }
     assert patch_dictionary(original, patch) == expected
+
 
 def test_operation_insert_negative_index_again():
     """Insert element using a negative index."""
@@ -69,6 +73,7 @@ def test_operation_insert_negative_index_again():
     }
     assert patch_dictionary(original, patch) == expected
 
+
 def test_operation_insert_out_of_bounds():
     """Insert element in an out-of-bounds position."""
     original = {
@@ -80,6 +85,7 @@ def test_operation_insert_out_of_bounds():
     with pytest.raises(PatchworkInputError):
         _ = patch_dictionary(original, patch)
 
+
 def test_operation_insert_out_of_bounds_negative_index():
     """Insert element in an out-of-bounds position."""
     original = {
@@ -90,4 +96,3 @@ def test_operation_insert_out_of_bounds_negative_index():
     }
     with pytest.raises(PatchworkInputError):
         _ = patch_dictionary(original, patch)
-

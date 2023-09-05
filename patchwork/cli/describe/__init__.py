@@ -1,4 +1,3 @@
-
 import click
 
 from .operation import describe_operation

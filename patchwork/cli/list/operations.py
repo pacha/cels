@@ -1,10 +1,10 @@
-
 import click
 from rich import box
 from rich.table import Table
 from rich.console import Console
 
 from patchwork.models import Operation
+
 
 @click.command(name="operations")
 def patchwork_operations():

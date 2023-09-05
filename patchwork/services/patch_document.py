@@ -1,7 +1,7 @@
-
 import json
 
 import yaml
+
 # tomli is included in the Python standard lib from 3.11
 try:
     import tomllib as toml
@@ -36,6 +36,7 @@ dump_parameters = {
 serialize_exceptions = (yaml.YAMLError, ValueError, TypeError)
 deserialize_exceptions = (yaml.YAMLError, toml.TOMLDecodeError, json.JSONDecodeError)
 
+
 def patch_document(
     input_format: str,
     input_text: str,
@@ -58,9 +59,7 @@ def patch_document(
             f"Valid formats: {', '.join(load_functions.keys())}."
         )
     except deserialize_exceptions as err:
-        raise PatchworkInputError(
-            f"Error while parsing input text:\n{err}"
-        )
+        raise PatchworkInputError(f"Error while parsing input text:\n{err}")
 
     # get patch dictionary
     try:
@@ -71,9 +70,7 @@ def patch_document(
             f"Valid formats: {', '.join(load_functions.keys())}."
         )
     except deserialize_exceptions as err:
-        raise PatchworkInputError(
-            f"Error while parsing patch:\n{err}"
-        )
+        raise PatchworkInputError(f"Error while parsing patch:\n{err}")
 
     # get output dictionary
     output_dict = patch_dictionary(
@@ -95,9 +92,6 @@ def patch_document(
             f"Valid formats: {', '.join(load_functions.keys())}."
         )
     except serialize_exceptions as err:
-        raise PatchworkInputError(
-            f"Error while encoding output:\n{err}"
-        )
+        raise PatchworkInputError(f"Error while encoding output:\n{err}")
 
     return output_text
-

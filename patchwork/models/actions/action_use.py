@@ -1,4 +1,3 @@
-
 from patchwork.lib.copy_on_write import safe_set
 from patchwork.lib.copy_on_write import safe_traverse
 from patchwork.exceptions import PatchworkInputError
@@ -16,9 +15,7 @@ def action_use(output_dict, key, indices, change_value, input_dict, patch, path)
     try:
         var_value = patch.get_var(change_value)
     except KeyError:
-        raise PatchworkInputError(
-            f"Variable name '{change_value}' not defined."
-        )
+        raise PatchworkInputError(f"Variable name '{change_value}' not defined.")
 
     # perform action
     safe_set(container, index, var_value)

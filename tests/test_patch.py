@@ -1,4 +1,3 @@
-
 from patchwork.models import Patch
 from patchwork.models import Operation
 
@@ -8,6 +7,7 @@ def test_patch_empty():
     raw_patch = {}
     patch = Patch(raw_patch)
     assert patch.data == {}
+
 
 def test_patch_minimal():
     """An empty patch dictionary generates an empty Patch."""
@@ -20,5 +20,3 @@ def test_patch_minimal():
     assert patch["foo"][0].operation is None
     assert patch["foo"][0].value == 1
     assert patch["foo"][0].indices == []
-
-

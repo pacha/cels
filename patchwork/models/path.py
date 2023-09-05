@@ -6,6 +6,7 @@ from patchwork.exceptions import PatchworkInputError
 
 special_chars_pattern = re.compile(r"\.|\[|\]")
 
+
 @dataclass
 class Path:
     """Path to locate a value in a structure of nested dictionaries/lists.
@@ -38,7 +39,7 @@ class Path:
 
     expr: str
 
-    def __init__(self, expr: str = ''):
+    def __init__(self, expr: str = ""):
         self.expr = expr
 
     def __str__(self):
@@ -55,7 +56,7 @@ class Path:
         # get escape characters
         part_str = str(part)
         if special_chars_pattern.search(part_str):
-            left_escape, right_escape = "\"", "\""
+            left_escape, right_escape = '"', '"'
         else:
             left_escape, right_escape = "", ""
 
@@ -74,11 +75,12 @@ class Path:
 
         # get parts
         expr_pattern = r'\."([^"]+)"|\["([^"]+)"\]|\.([^.\[]+)|\[([^\]]+)\]'
-        parts = [r.group(1) or r.group(2) or r.group(3) or r.group(4) for r in re.finditer(expr_pattern, self.expr)]
-        if not parts and self.expr not in ('', '.'):
-            raise PatchworkInputError(
-                f"Impossible to parse path '{self.expr}'"
-            )
+        parts = [
+            r.group(1) or r.group(2) or r.group(3) or r.group(4)
+            for r in re.finditer(expr_pattern, self.expr)
+        ]
+        if not parts and self.expr not in ("", "."):
+            raise PatchworkInputError(f"Impossible to parse path '{self.expr}'")
 
         # traverse data
         value = data
@@ -91,4 +93,3 @@ class Path:
                     f"Part '{part}' in path '{self}' not found ({err})."
                 )
         return value
-

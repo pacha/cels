@@ -1,4 +1,3 @@
-
 import click
 
 from .operations import patchwork_operations

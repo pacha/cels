@@ -1,4 +1,3 @@
-
 import logging as log
 
 from patchwork.exceptions import PatchworkInputError
@@ -7,18 +6,23 @@ from patchwork.exceptions import PatchworkInputError
 # (ensures that all exceptions show the path where they happened)
 action_name_prefix_length = len("action_")
 
+
 def action(action_func):
     def wrapped_func(container, key, indices, change_value, input_dict, patch, path):
         new_path = (path + key).append(indices)
         action_name = action_func.__name__[action_name_prefix_length:]
         log.info(f"{new_path} {{{action_name}}}")
         try:
-            return action_func(container, key, indices, change_value, input_dict, patch, path)
+            return action_func(
+                container, key, indices, change_value, input_dict, patch, path
+            )
         except PatchworkInputError as err:
             raise PatchworkInputError(
                 f"Action: {action_name} Path: {new_path} Error: {err}"
             )
+
     return wrapped_func
+
 
 from .action_keep import action_keep
 from .action_set import action_set

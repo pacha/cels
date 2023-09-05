@@ -1,4 +1,3 @@
-
 import re
 from dataclasses import dataclass
 
@@ -16,7 +15,6 @@ class Annotation:
     indices: list[int | None]
 
     def __init__(self, raw_annotation: str, index_marker: str = default.index_marker):
-
         # extract parts from the raw annotation string
         self.index_marker = re.escape(index_marker)
         operation_pattern = r"([a-z]+)"
@@ -66,7 +64,7 @@ class Annotation:
                 try:
                     self.indices.append(int(index_str))
                 except ValueError:
-                    if index_str != '_':
+                    if index_str != "_":
                         raise PatchworkInputError(
                             f"Invalid index '{index_str}'. Indices can only be integers or '_'."
                         )
