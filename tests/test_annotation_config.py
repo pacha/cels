@@ -1,5 +1,7 @@
-import pytest
+from typing import Union
 from dataclasses import dataclass
+
+import pytest
 
 from patchwork.models import AnnotationConfig
 from patchwork.exceptions import PatchworkInputError
@@ -11,7 +13,7 @@ class Example:
     separator: str
     left_marker: str
     right_marker: str
-    match: str | None = None
+    match: Union[str, None] = None
 
 
 correct_annotation_list = [

@@ -1,4 +1,5 @@
 from typing import Any
+from typing import Union
 from dataclasses import dataclass
 
 from .annotation import Annotation
@@ -11,7 +12,7 @@ class AnnotatedKey:
     """A dictionary key with an annotation of the kind {operation@index1,index2,...}."""
 
     key: Any
-    annotation: Annotation | None
+    annotation: Union[Annotation, None]
 
     def __init__(self, raw_key, annotation_config: AnnotationConfig):
         # check if the key is not a string

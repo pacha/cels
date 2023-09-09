@@ -1,4 +1,7 @@
 from typing import Any
+from typing import List
+from typing import Dict
+from typing import Union
 from typing import ClassVar
 from dataclasses import dataclass
 
@@ -12,21 +15,21 @@ hints_map = {
     "dict": dict,
     "list": list,
     "None": None,
-    "list[dict[str, Any]]": list[dict[str, Any]],
-    "str | int | bool | None": str | int | bool | None,
+    "list[dict[str, Any]]": List[Dict[str, Any]],
+    "str | int | bool | None": Union[str, int, bool, None],
 }
 
 
 @dataclass
 class Operation:
     # class attributes
-    instances: ClassVar[dict[str, "Operation"]] = {}
+    instances: ClassVar[Dict[str, "Operation"]] = {}
 
     # instance attributes
     name: str
     description: str
     notes: str
-    examples: list[dict[str, str]]
+    examples: List[Dict[str, str]]
     takes_indices: bool
     takes_underscore_index: bool
     value_type: Any

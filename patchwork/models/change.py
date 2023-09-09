@@ -1,4 +1,6 @@
 from typing import Any
+from typing import List
+from typing import Union
 from dataclasses import field
 from dataclasses import dataclass
 
@@ -32,15 +34,15 @@ valid_operation_values = {
 
 @dataclass
 class Change:
-    operation: Operation | None
+    operation: Union[Operation, None]
     value: Any
-    indices: list[int | None] = field(default_factory=list)
+    indices: List[Union[int, None]] = field(default_factory=list)
 
     def __init__(
         self,
-        operation: Operation | None,
+        operation: Union[Operation, None],
         value: Any = None,
-        indices: list[int | None] = [],
+        indices: List[Union[int, None]] = [],
     ):
         if operation:
             # chech that the value type matches the allowed types

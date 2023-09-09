@@ -1,5 +1,6 @@
 import re
 from typing import Any
+from typing import List
 from dataclasses import dataclass
 
 from patchwork.exceptions import PatchworkInputError
@@ -64,7 +65,7 @@ class Path:
         new_expr = f"{self.expr}{left_separator}{left_escape}{part_str}{right_escape}{right_separator}"
         return Path(new_expr)
 
-    def append(self, parts: list[Any]):
+    def append(self, parts: List[Any]):
         new_path = self
         for part in parts:
             new_path = new_path + part

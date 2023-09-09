@@ -1,4 +1,6 @@
 import re
+from typing import List
+from typing import Union
 from dataclasses import dataclass
 
 from patchwork import default
@@ -12,7 +14,7 @@ class Annotation:
 
     operation: Operation
     index_marker: str
-    indices: list[int | None]
+    indices: List[Union[int, None]]
 
     def __init__(self, raw_annotation: str, index_marker: str = default.index_marker):
         # extract parts from the raw annotation string

@@ -1,5 +1,8 @@
 from typing import Any
+from typing import Dict
+from typing import List
 from typing import Tuple
+from typing import Union
 from dataclasses import dataclass
 
 from .change import Change
@@ -15,19 +18,19 @@ from patchwork.lib.value_type import value_type
 class Patch:
     """Normalized form of a raw dictionary patch."""
 
-    vars: dict[str, Any]
-    data: dict[Any, list[Change]]
+    vars: Dict[str, Any]
+    data: Dict[Any, List[Change]]
     annotation_config: AnnotationConfig
-    parent_patch: "Patch | None"
+    parent_patch: "Union[Patch, None]"
 
-    def __getitem__(self, key: Any) -> list[Change]:
+    def __getitem__(self, key: Any) -> List[Change]:
         return self.data[key]
 
     def __init__(
         self,
         raw_patch: dict,
         annotation_config: AnnotationConfig = AnnotationConfig(),
-        parent_patch: "Patch | None" = None,
+        parent_patch: "Union[Patch, None]" = None,
     ):
         self.parent_patch = parent_patch
         self.annotation_config = annotation_config
