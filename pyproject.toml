@@ -1,4 +1,39 @@
+[project]
+name = "patchwork"
+version = "0.0.1"
+authors = [
+  { name="Andrés Sopeña Pérez", email="" },
+]
+description = "Patch your YAML and JSON files."
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "click>=8.1.5",
+    "coloredlogs>=15.0.1",
+    "dacite>=1.8.1",
+    "Jinja2>=3.1.2",
+    "PyYAML>=6.0.1",
+    "rich>=13.5.2",
+    "tomli>=2.0.1",
+    "tomli_w>=1.0.0",
+    "typeguard>=4.0.0",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/pacha/patchwork"
+"Bug Tracker" = "https://github.com/pacha/patchwork/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [tool.pytest.ini_options]
 log_cli = false
 log_cli_level = "INFO"
 log_cli_format = "[%(levelname)s] %(message)s"
+

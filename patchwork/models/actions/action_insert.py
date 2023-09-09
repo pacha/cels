@@ -1,5 +1,5 @@
-from patchwork.lib.copy_on_write import safe_traverse
-from patchwork.lib.copy_on_write import safe_insert
+from patchwork.lib.safe import safe_traverse
+from patchwork.lib.safe import safe_extend
 from . import action
 
 
@@ -9,6 +9,6 @@ def action_insert(output_dict, key, indices, change_value, input_dict, patch, pa
 
     container, index = safe_traverse(output_dict, key, indices)
     if not indices:
-        safe_insert(container[index], None, change_value)
+        safe_extend(container[index], None, [change_value])
     else:
-        safe_insert(container, index, change_value)
+        safe_extend(container, index, [change_value])

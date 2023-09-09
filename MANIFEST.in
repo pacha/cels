@@ -1,0 +1,2 @@
+recursive-include patchwork/data *.yaml
+include LICENSE README.md

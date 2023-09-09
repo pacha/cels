@@ -1,4 +1,4 @@
 from pathlib import Path
 
-project_path = Path(__file__).absolute().parent.parent
-data_path = project_path / "data"
+package_path = Path(__file__).absolute().parent
+data_path = package_path / "data"

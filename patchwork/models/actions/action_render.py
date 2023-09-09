@@ -2,8 +2,8 @@ from jinja2 import Template
 from jinja2 import TemplateError
 
 from patchwork.exceptions import PatchworkInputError
-from patchwork.lib.copy_on_write import safe_set
-from patchwork.lib.copy_on_write import safe_traverse
+from patchwork.lib.safe import safe_set
+from patchwork.lib.safe import safe_traverse
 from . import action
 
 

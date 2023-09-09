@@ -1,5 +1,5 @@
-from patchwork.lib.copy_on_write import safe_traverse
-from patchwork.lib.copy_on_write import safe_get
+from patchwork.lib.safe import safe_traverse
+from patchwork.lib.safe import safe_get
 from . import action
 
 

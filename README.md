@@ -2,6 +2,8 @@
 Patchwork
 =========
 
+![Tests](https://github.com/pacha/patchwork/actions/workflows/tests.yaml/badge.svg?branch=tox-test)
+
 Patch your YAML, JSON, TOML files or Python dictionaries.
 
 **WIP: Not ready for use yet!!!**
