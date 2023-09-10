@@ -1,8 +1,8 @@
-
 from patchwork.lib.value_type import value_type
 from patchwork.exceptions import PatchworkInputError
 from .mutated_dict import MutatedDict
 from .mutated_list import MutatedList
+
 
 def make_safe(container):
     if isinstance(container, MutatedDict) or isinstance(container, MutatedList):

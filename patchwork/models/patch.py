@@ -92,7 +92,9 @@ class Patch:
         )
         return [change]
 
-    def get_keys(self, input_dict: dict) -> Generator[Tuple[Any, KeyLocation], None, None]:
+    def get_keys(
+        self, input_dict: dict
+    ) -> Generator[Tuple[Any, KeyLocation], None, None]:
         """Return all keys with their corresponding locations."""
 
         # classify input keys

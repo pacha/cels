@@ -1,6 +1,6 @@
-
 from patchwork.lib.value_type import value_type
 from patchwork.exceptions import PatchworkInputError
+
 
 def safe_get(container, index):
     """Get an element from a dictionary or list and raise PatchworkInputError in case of problem."""

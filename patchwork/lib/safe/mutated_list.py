@@ -1,5 +1,5 @@
-
 import yaml
+
 
 class MutatedList(list):
     """Class used to mark list values that have been mutated.
@@ -9,6 +9,7 @@ class MutatedList(list):
     is modified in place, a shallow copy is used instead in order not to modify the original
     data structure. For lists, the shallow copy will be marked as mutated by using this class.
     """
+
     pass
 
 

@@ -1,5 +1,5 @@
-
 from typing import Any
+
 
 def value_type(value: Any) -> str:
     """Return the type of a given value as a string."""

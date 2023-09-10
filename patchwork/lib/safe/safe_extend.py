@@ -1,6 +1,6 @@
-
 from patchwork.lib.value_type import value_type
 from patchwork.exceptions import PatchworkInputError
+
 
 def safe_extend(container, index, value):
     if not isinstance(container, list):
