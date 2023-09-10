@@ -1,0 +1,23 @@
+name: Code formatting
+
+on: [push]
+
+jobs:
+  test:
+    name: Run formatting check
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+
+    - name: Install dependencies
+      run: pip install black
+
+    - name: Run black check
+      run: black --check .

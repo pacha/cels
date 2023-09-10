@@ -3,7 +3,8 @@ Patchwork
 =========
 
 ![Tests](https://github.com/pacha/patchwork/actions/workflows/tests.yaml/badge.svg)
-![mypy](https://github.com/pacha/patchwork/actions/workflows/mypy.yaml/badge.svg)
+![Type checks](https://github.com/pacha/patchwork/actions/workflows/type-checks.yaml/badge.svg)
+![Code formatting](https://github.com/pacha/patchwork/actions/workflows/code-formatting.yaml/badge.svg)
 
 Patch your YAML, JSON, TOML files or Python dictionaries.
 

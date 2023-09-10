@@ -1,4 +1,4 @@
-name: mypy
+name: Type checks
 
 on: [push]
 
@@ -18,9 +18,6 @@ jobs:
 
     - name: Install dependencies
       run: pip install mypy
-
-    - name: Install patchwork package
-      run: pip install .
 
     - name: Run mypy checks
       run: mypy patchwork/
