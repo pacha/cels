@@ -17,7 +17,9 @@ jobs:
         python-version: 3.11
 
     - name: Install dependencies
-      run: pip install mypy
+      run: |
+        pip install mypy
+        mypy --install-types
 
     - name: Run mypy checks
       run: mypy patchwork/

@@ -15,7 +15,7 @@ export PYTHONPATH := project_dir
 @format:
   black {{ project_dir }}
 
-@check:
+@type-check:
   mypy {{ project_dir }}/patchwork/
 
 @cli:
