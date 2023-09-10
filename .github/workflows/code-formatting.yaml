@@ -3,7 +3,7 @@ name: Code formatting
 on: [push]
 
 jobs:
-  test:
+  code-formatting:
     name: Run formatting check
     runs-on: ubuntu-latest
 

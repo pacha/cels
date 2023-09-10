@@ -37,3 +37,6 @@ log_cli = false
 log_cli_level = "INFO"
 log_cli_format = "[%(levelname)s] %(message)s"
 
+[tool.mypy]
+show_error_codes = true
+ignore_missing_imports = true
