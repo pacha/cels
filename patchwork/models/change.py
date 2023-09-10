@@ -14,23 +14,6 @@ from .operation import Operation
 from patchwork.lib.value_type import value_type
 from patchwork.exceptions import PatchworkInputError
 
-list_exclusive_operations = ["insert", "extend"]
-operations_without_value = ["delete"]
-allowed_operations_for_new_keys = ["set"]
-
-list_operations = ["patch", "set", "delete", "insert", "extend"]
-valid_operation_values = {
-    "patch": dict,
-    "set": Any,
-    "delete": None,
-    "rename": Any,
-    "insert": Any,
-    "extend": list,
-    "var": Any,
-    "link": str,
-    "render": str,
-}
-
 
 @dataclass
 class Change:
