@@ -1,3 +1,4 @@
+from typing import Optional
 import logging as log
 
 from patchwork.models import Path
@@ -32,7 +33,7 @@ def patch_dictionary(
 
 def patch_dictionary_rec(
     path: Path,
-    parent_patch: Patch,
+    parent_patch: Optional[Patch],
     input_dict: dict,
     patch_dict: dict,
     annotation_config: AnnotationConfig,

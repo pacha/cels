@@ -3,6 +3,7 @@ from typing import Dict
 from typing import List
 from typing import Tuple
 from typing import Union
+from typing import Generator
 from dataclasses import dataclass
 
 from .change import Change
@@ -91,7 +92,7 @@ class Patch:
         )
         return [change]
 
-    def get_keys(self, input_dict: dict) -> Tuple[Any, KeyLocation]:
+    def get_keys(self, input_dict: dict) -> Generator[Tuple[Any, KeyLocation], None, None]:
         """Return all keys with their corresponding locations."""
 
         # classify input keys

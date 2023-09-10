@@ -22,6 +22,7 @@ dependencies = [
     "tomli>=2.0.1",
     "tomli_w>=1.0.0",
     "typeguard>=4.0.0",
+    "types-pyyaml>=6.0.12.11",
 ]
 
 [project.urls]

@@ -1,4 +1,7 @@
 import json
+from typing import Any
+from typing import Dict
+from typing import Callable
 
 import yaml
 
@@ -6,7 +9,7 @@ import yaml
 try:
     import tomllib as toml
 except ModuleNotFoundError:
-    import tomli as toml
+    import tomli as toml  # type: ignore
 import tomli_w
 
 from patchwork import default
@@ -14,19 +17,19 @@ from patchwork.exceptions import PatchworkInputError
 from .patch_dictionary import patch_dictionary
 
 
-load_functions = {
+load_functions: Dict[str, Callable] = {
     "yaml": yaml.safe_load,
     "json": json.loads,
     "toml": toml.loads,
 }
 
-dump_functions = {
+dump_functions: Dict[str, Callable] = {
     "yaml": yaml.safe_dump,
     "json": json.dumps,
     "toml": tomli_w.dumps,
 }
 
-dump_parameters = {
+dump_parameters: Dict[str, Dict[str, Any]] = {
     "yaml": {"sort_keys": False},
     "json": {},
     "toml": {},

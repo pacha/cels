@@ -14,4 +14,4 @@ def value_type(value: Any) -> str:
     try:
         return type(value).__name__
     except Exception:
-        return type(value)
+        return str(type(value))

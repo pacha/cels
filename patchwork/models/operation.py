@@ -70,7 +70,7 @@ class Operation:
         return list(cls.instances.values())
 
     @classmethod
-    def show_names(cls) -> "list[str]":
+    def show_names(cls) -> str:
         operation_names = [operation.name for operation in cls.instances.values()]
         return ", ".join(operation_names)
 
@@ -84,7 +84,7 @@ class Operation:
     def __str__(self):
         return self.name
 
-    def __eq__(self, other: "Operation | str") -> bool:
+    def __eq__(self, other: Any) -> bool:
         if isinstance(other, Operation):
             return self.name == other.name
         elif isinstance(other, str):
