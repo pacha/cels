@@ -8,13 +8,15 @@ action_name_prefix_length = len("action_")
 
 
 def action(action_func):
-    def wrapped_func(container, key, indices, change_value, input_dict, patch, path):
+    def wrapped_func(
+        container, key, indices, change_value, patch, path, root_input_dict
+    ):
         new_path = (path + key).append(indices)
         action_name = action_func.__name__[action_name_prefix_length:]
         log.info(f"{new_path} {{{action_name}}}")
         try:
             return action_func(
-                container, key, indices, change_value, input_dict, patch, path
+                container, key, indices, change_value, patch, path, root_input_dict
             )
         except PatchworkInputError as err:
             raise PatchworkInputError(

@@ -4,7 +4,7 @@ from . import action
 
 
 @action
-def action_keep(output_dict, key, indices, change_value, input_dict, patch, path):
+def action_keep(output_dict, key, indices, change_value, patch, path, root_input_dict):
     """Keep current value."""
 
     # 'keep' is a noop action, so we only check the validity of the index

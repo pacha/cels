@@ -4,7 +4,7 @@ from . import action
 
 
 @action
-def action_set(output_dict, key, indices, change_value, input_dict, patch, path):
+def action_set(output_dict, key, indices, change_value, patch, path, root_input_dict):
     """Set new value."""
 
     container, index = safe_traverse(output_dict, key, indices)

@@ -4,7 +4,9 @@ from . import action
 
 
 @action
-def action_rename(output_dict, key, indices, change_value, input_dict, patch, path):
+def action_rename(
+    output_dict, key, indices, change_value, patch, path, root_input_dict
+):
     """Raise exception to notify a key rename."""
 
     # check that key is present

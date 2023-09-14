@@ -58,7 +58,9 @@ def test_operation_patch_explicitly():
 
 def test_operation_patch_non_annotated_key_non_dict_value():
     """Non annotated key whose original value is not a dict yields a 'set' operation."""
-    original = {"foo": 1}
+    original = {
+        "foo": 1,
+    }
     patch = {
         "foo": {"bar": 1},
     }
@@ -70,12 +72,16 @@ def test_operation_patch_non_annotated_key_non_dict_value():
 
 def test_operation_patch_non_dict_value():
     """It is not possible to patch an integer."""
-    original = {"foo": 1}
+    original = {
+        "foo": 1,
+    }
     patch = {
         "foo {patch}": {"bar": 1},
     }
-    with pytest.raises(PatchworkInputError):
-        _ = patch_dictionary(original, patch)
+    expected = {
+        "foo": {"bar": 1},
+    }
+    assert patch_dictionary(original, patch) == expected
 
 
 def test_operation_patch_with_non_dict_value():

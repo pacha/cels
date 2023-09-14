@@ -7,12 +7,11 @@ from typing import Generator
 from dataclasses import dataclass
 
 from .change import Change
-from .operation import Operation
 from .key_location import KeyLocation
 from .annotated_key import AnnotatedKey
 from .annotation_config import AnnotationConfig
 from patchwork.exceptions import PatchworkInputError
-from patchwork.lib.value_type import value_type
+from patchwork.lib.values import value_type
 
 
 @dataclass

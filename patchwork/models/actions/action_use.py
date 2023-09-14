@@ -5,7 +5,7 @@ from . import action
 
 
 @action
-def action_use(output_dict, key, indices, change_value, input_dict, patch, path):
+def action_use(output_dict, key, indices, change_value, patch, path, root_input_dict):
     """Use a patch variable to set the value."""
 
     # get container to modify

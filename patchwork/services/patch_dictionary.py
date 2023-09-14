@@ -25,6 +25,7 @@ def patch_dictionary(
         parent_patch=None,
         input_dict=input_dict,
         patch_dict=patch_dict,
+        root_input_dict=input_dict,
         annotation_config=AnnotationConfig(
             separator, left_marker, index_marker, right_marker
         ),
@@ -36,6 +37,7 @@ def patch_dictionary_rec(
     parent_patch: Optional[Patch],
     input_dict: dict,
     patch_dict: dict,
+    root_input_dict: dict,
     annotation_config: AnnotationConfig,
 ) -> dict:
     """Patch a dictionary (recursive function)."""
@@ -60,13 +62,14 @@ def patch_dictionary_rec(
         # patch by applying all changes
         for change in patch[key]:
             try:
-                change.apply(output_dict, key, input_dict, patch, path)
+                change.apply(output_dict, key, patch, path, root_input_dict)
             except PatchworkActionPatch as exc:
                 exc.tail_container[exc.tail_index] = patch_dictionary_rec(
                     path=exc.tail_path,
                     parent_patch=patch,
                     input_dict=exc.input_dict,
                     patch_dict=exc.patch_dict,
+                    root_input_dict=root_input_dict,
                     annotation_config=annotation_config,
                 )
             except PatchworkActionRename:

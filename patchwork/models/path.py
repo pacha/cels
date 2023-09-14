@@ -89,8 +89,8 @@ class Path:
             try:
                 index = int(part) if isinstance(value, list) else part
                 value = value[index]
-            except (KeyError, IndexError, TypeError) as err:
+            except (KeyError, IndexError, TypeError):
                 raise PatchworkInputError(
-                    f"Part '{part}' in path '{self}' not found ({err})."
+                    f"Impossible to find path element '{part}' while looking for '{self}'."
                 )
         return value

@@ -1,6 +1,6 @@
 [project]
 name = "patchwork"
-version = "0.0.1"
+version = "0.7.0"
 authors = [
   { name="Andrés Sopeña Pérez", email="" },
 ]

@@ -4,7 +4,9 @@ from . import action
 
 
 @action
-def action_insert(output_dict, key, indices, change_value, input_dict, patch, path):
+def action_insert(
+    output_dict, key, indices, change_value, patch, path, root_input_dict
+):
     """Insert an element in a list."""
 
     container, index = safe_traverse(output_dict, key, indices)

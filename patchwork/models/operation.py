@@ -74,13 +74,6 @@ class Operation:
         operation_names = [operation.name for operation in cls.instances.values()]
         return ", ".join(operation_names)
 
-    @property
-    def value_type_name(self):
-        try:
-            return self.value_type.__name__
-        except Exception:
-            return str(self.value_type)
-
     def __str__(self):
         return self.name
 

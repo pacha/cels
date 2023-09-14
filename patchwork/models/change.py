@@ -11,7 +11,7 @@ from typeguard import TypeCheckError
 
 from .actions import actions
 from .operation import Operation
-from patchwork.lib.value_type import value_type
+from patchwork.lib.values import value_type
 from patchwork.exceptions import PatchworkInputError
 
 
@@ -34,8 +34,8 @@ class Change:
             except TypeCheckError:
                 raise PatchworkInputError(
                     f"Can't execute operation '{operation}' with the value found in "
-                    f"the patch dictionary ('{value}'). "
-                    f"This operation requires a patch value of type '{operation.value_type_name}' "
+                    f"the patch dictionary: '{value}'. "
+                    f"This operation requires a patch value of type '{value_type(operation.value_type)}' "
                     f"instead of type '{value_type(value)}'."
                 )
             # check that the operation takes indices
@@ -95,21 +95,23 @@ class Change:
         )
         return f"{{{self.operation.name}{index_str}}}"
 
-    def apply(self, output_dict, key, input_dict, patch, path):
+    def apply(self, output_dict, key, patch, path, root_input_dict):
         """Apply operation at key."""
 
         # find operation
         if self.operation:
             operation_name = self.operation.name
         else:
-            try:
-                input_value_is_dict = isinstance(output_dict[key], dict)
-            except KeyError:
-                input_value_is_dict = False
+            # try:
+            #     input_value_is_dict = isinstance(output_dict[key], dict)
+            # except KeyError:
+            #     input_value_is_dict = False
+            # patch_value_is_dict = isinstance(self.value, dict)
+            # operation_name = (
+            #     "patch" if input_value_is_dict and patch_value_is_dict else "set"
+            # )
             patch_value_is_dict = isinstance(self.value, dict)
-            operation_name = (
-                "patch" if input_value_is_dict and patch_value_is_dict else "set"
-            )
+            operation_name = "patch" if patch_value_is_dict else "set"
 
         # find action
         action = actions[operation_name]
@@ -120,7 +122,7 @@ class Change:
             key=key,
             indices=self.indices,
             change_value=self.value,
-            input_dict=input_dict,
             patch=patch,
             path=path,
+            root_input_dict=root_input_dict,
         )

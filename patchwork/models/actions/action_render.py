@@ -8,8 +8,10 @@ from . import action
 
 
 @action
-def action_render(output_dict, key, indices, change_value, input_dict, patch, path):
-    """Set the value pointed by a path in input_dict as new value."""
+def action_render(
+    output_dict, key, indices, change_value, patch, path, root_input_dict
+):
+    """Render a template using variables defined in the patch dictionary."""
 
     # get container to modify
     container, index = safe_traverse(output_dict, key, indices)
