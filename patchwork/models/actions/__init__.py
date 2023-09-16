@@ -1,5 +1,4 @@
-import logging as log
-
+from patchwork.logs import log
 from patchwork.exceptions import PatchworkInputError
 
 # define action decorator
@@ -13,15 +12,13 @@ def action(action_func):
     ):
         new_path = (path + key).append(indices)
         action_name = action_func.__name__[action_name_prefix_length:]
-        log.info(f"{new_path} {{{action_name}}}")
+        log.info(f"{new_path} [cyan]{{{action_name}}}[/]", extra={"markup": True})
         try:
             return action_func(
                 container, key, indices, change_value, patch, path, root_input_dict
             )
         except PatchworkInputError as err:
-            raise PatchworkInputError(
-                f"Action: {action_name} Path: {new_path} Error: {err}"
-            )
+            raise PatchworkInputError(f"{new_path} {{{action_name}}}: {err}")
 
     return wrapped_func
 

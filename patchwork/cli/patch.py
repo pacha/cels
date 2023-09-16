@@ -1,11 +1,10 @@
 import sys
-import logging as log
 from pathlib import Path
 
 import click
 
+from patchwork.logs import log
 from patchwork import default
-from patchwork.logs import init_logging
 from patchwork.services import patch_document
 from patchwork.exceptions import PatchworkError
 
@@ -104,7 +103,7 @@ def patchwork_patch(
     """Patch a yaml, json or toml file."""
 
     # setup logging
-    init_logging("debug" if verbose else "warn")
+    log.setLevel("DEBUG" if verbose else "WARN")
 
     # infer and normalize input format
     if not input_format:
@@ -133,19 +132,9 @@ def patchwork_patch(
         output_format = input_format
     output_format = output_format.lower()
 
-    # get input text
-    log.debug(f"Input file: {click.format_filename(input_file)}")
-    log.debug(f"Input format: {input_format}")
+    # compose output
     input_text = input_file.read_text()
-
-    # get patch text
-    log.debug(f"Patch file: {click.format_filename(patch_file)}")
-    log.debug(f"Patch format: {patch_format}")
     patch_text = patch_file.read_text()
-
-    # get output text
-    log.debug(f"Output file: {click.format_filename(output_file)}")
-    log.debug(f"Output format: {output_format}")
     try:
         output_text = patch_document(
             input_format=input_format,
@@ -168,6 +157,4 @@ def patchwork_patch(
             f.write(output_text)
     except OSError as err:
         log.error(f"Error found when saving output file: {err}")
-        sys.exit(3)
-    else:
-        log.debug("Done.")
+        sys.exit(4)

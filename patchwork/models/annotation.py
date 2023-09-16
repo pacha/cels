@@ -4,6 +4,7 @@ from typing import Union
 from dataclasses import dataclass
 
 from patchwork import default
+from patchwork.lib.values import show_value
 from patchwork.exceptions import PatchworkInputError
 from .operation import Operation
 
@@ -38,8 +39,8 @@ class Annotation:
             self.operation = Operation.get(operation_name)
         except KeyError:
             raise PatchworkInputError(
-                f"Invalid operation '{operation_name}'. "
-                f"Valid operations are: {Operation.show_names()}."
+                f"Invalid operation {show_value(operation_name)}. "
+                f"Valid operations are [{', '.join([str(operation) for operation in Operation.get_all()])}]"
             )
 
         # set indices

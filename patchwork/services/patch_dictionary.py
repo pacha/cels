@@ -1,10 +1,11 @@
 from typing import Optional
-import logging as log
 
+from patchwork.logs import log
 from patchwork.models import Path
 from patchwork.models import Patch
 from patchwork.models import KeyLocation
 from patchwork.models import AnnotationConfig
+from patchwork.exceptions import PatchworkInputError
 from patchwork.exceptions import PatchworkActionPatch
 from patchwork.exceptions import PatchworkActionRename
 
@@ -43,7 +44,7 @@ def patch_dictionary_rec(
     """Patch a dictionary (recursive function)."""
 
     # get patch for this dictionary
-    patch = Patch(patch_dict, annotation_config, parent_patch)
+    patch = Patch(patch_dict, annotation_config, parent_patch, path)
 
     # create output dict
     output_dict = {}
@@ -56,7 +57,7 @@ def patch_dictionary_rec(
 
         # if only in input_dict, then nothing to process
         if location == KeyLocation.only_input:
-            log.info(f"{path + key} {{keep}}")
+            log.info(f"{path + key} [cyan]{{keep}}[/]", extra={"markup": True})
             continue
 
         # patch by applying all changes

@@ -1,7 +1,5 @@
 import sys
 
-# import logging as log
-import logging
 
 import click
 from rich import box
@@ -10,27 +8,14 @@ from rich.console import Console
 from rich.columns import Columns
 from rich.panel import Panel
 
+from patchwork.logs import log
 from patchwork.models import Operation
-from patchwork.logs import init_logging
-from rich.logging import RichHandler
 
 
 @click.command(name="operation")
 @click.argument("operation_name")
 def describe_operation(operation_name):
     """Describe an operation."""
-
-    # init_logging("error")
-
-    FORMAT = "%(message)s"
-    logging.basicConfig(
-        level="NOTSET",
-        format=FORMAT,
-        datefmt="[%X]",
-        handlers=[RichHandler(show_time=False)],
-    )
-
-    log = logging.getLogger("rich")
 
     try:
         operation = Operation.get(operation_name)
@@ -55,4 +40,4 @@ def describe_operation(operation_name):
                 expand=False,
             )
         )
-    # console.print(Columns(panels, title="Examples", expand=True, equal=True))
+    console.print(Columns(panels, title="Examples", expand=True, equal=True))

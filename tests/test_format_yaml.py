@@ -3,7 +3,7 @@ from inspect import cleandoc
 from patchwork import patch_yaml
 
 
-def test_yaml_set0():
+def test_yaml_empty():
     input = cleandoc(
         """
     """
@@ -22,7 +22,7 @@ def test_yaml_set0():
     assert output == result
 
 
-def test_yaml_set1():
+def test_yaml_only_input():
     input = cleandoc(
         """
 
@@ -46,7 +46,31 @@ def test_yaml_set1():
     assert output == result
 
 
-def test_yaml_set2():
+def test_yaml_only_patch():
+    input = cleandoc(
+        """
+    """
+    )
+    patch = cleandoc(
+        """
+
+    foo: 1
+
+    """
+    )
+    result = cleandoc(
+        """
+
+    foo: 1
+
+    """
+    )
+
+    output = patch_yaml(input, patch).strip()
+    assert output == result
+
+
+def test_yaml_overwrite():
     input = cleandoc(
         """
 
@@ -73,7 +97,7 @@ def test_yaml_set2():
     assert output == result
 
 
-def test_yaml_set3():
+def test_yaml_compose():
     input = cleandoc(
         """
 
@@ -104,7 +128,7 @@ def test_yaml_set3():
     assert output == result
 
 
-def test_yaml_set4():
+def test_yaml_nested_dict():
     input = cleandoc(
         """
 
@@ -134,7 +158,7 @@ def test_yaml_set4():
     assert output == result
 
 
-def test_yaml_set5():
+def test_yaml_nested_dicts():
     input = cleandoc(
         """
 
@@ -167,7 +191,7 @@ def test_yaml_set5():
     assert output == result
 
 
-def test_yaml_set6():
+def test_yaml_list_overwrite():
     input = cleandoc(
         """
 
@@ -197,7 +221,7 @@ def test_yaml_set6():
     assert output == result
 
 
-def test_yaml_set7():
+def test_yaml_list_set():
     input = cleandoc(
         """
 
@@ -230,7 +254,7 @@ def test_yaml_set7():
     assert output == result
 
 
-def test_yaml_set8():
+def test_yaml_nested_list_set():
     input = cleandoc(
         """
 
@@ -267,7 +291,7 @@ def test_yaml_set8():
     assert output == result
 
 
-def test_yaml_set9():
+def test_yaml_nested_list_set_negative_index():
     input = cleandoc(
         """
 
@@ -304,7 +328,7 @@ def test_yaml_set9():
     assert output == result
 
 
-def test_yaml_set9():
+def test_yaml_multiple_changes():
     input = cleandoc(
         """
 

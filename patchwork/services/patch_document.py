@@ -62,7 +62,7 @@ def patch_document(
             f"Valid formats: {', '.join(load_functions.keys())}."
         )
     except deserialize_exceptions as err:
-        raise PatchworkInputError(f"Error while parsing input text:\n{err}")
+        raise PatchworkInputError(f"Error while parsing input:\n{err}")
 
     # get patch dictionary
     try:

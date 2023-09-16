@@ -1,5 +1,12 @@
-import coloredlogs  # type: ignore
+import logging
+from rich.logging import RichHandler
 
 
-def init_logging(log_level):
-    coloredlogs.install(fmt="%(levelname)8s | %(message)s", level=log_level)
+log_format = "%(message)s"
+logging.basicConfig(
+    level="NOTSET",
+    format=log_format,
+    datefmt="",
+    handlers=[RichHandler(show_time=False)],
+)
+log = logging.getLogger("patchwork")

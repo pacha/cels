@@ -1,3 +1,4 @@
+from patchwork.lib.values import show_value
 from patchwork.lib.values import value_type
 from patchwork.exceptions import PatchworkInputError
 from .mutated_dict import MutatedDict
@@ -12,5 +13,6 @@ def make_safe(container):
     if isinstance(container, list):
         return MutatedList(container)
     raise PatchworkInputError(
-        f"Object of type {value_type(container)} is not a list or a dictionary"
+        f"Expected element of type list or dictionary, "
+        f"found {show_value(container)} of type {value_type(container)}."
     )

@@ -69,11 +69,6 @@ class Operation:
     def get_all(cls) -> "list[Operation]":
         return list(cls.instances.values())
 
-    @classmethod
-    def show_names(cls) -> str:
-        operation_names = [operation.name for operation in cls.instances.values()]
-        return ", ".join(operation_names)
-
     def __str__(self):
         return self.name
 

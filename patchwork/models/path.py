@@ -44,7 +44,7 @@ class Path:
         self.expr = expr
 
     def __str__(self):
-        return self.expr
+        return self.expr if self.expr else "."
 
     def __add__(self, part: Any):
         """Create new path object by appending a new part."""

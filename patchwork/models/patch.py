@@ -6,6 +6,7 @@ from typing import Union
 from typing import Generator
 from dataclasses import dataclass
 
+from .path import Path
 from .change import Change
 from .key_location import KeyLocation
 from .annotated_key import AnnotatedKey
@@ -22,6 +23,7 @@ class Patch:
     data: Dict[Any, List[Change]]
     annotation_config: AnnotationConfig
     parent_patch: "Union[Patch, None]"
+    path: Path
 
     def __getitem__(self, key: Any) -> List[Change]:
         return self.data[key]
@@ -31,22 +33,20 @@ class Patch:
         raw_patch: dict,
         annotation_config: AnnotationConfig = AnnotationConfig(),
         parent_patch: "Union[Patch, None]" = None,
+        path: Path = Path(),
     ):
         self.parent_patch = parent_patch
         self.annotation_config = annotation_config
+        self.path = path
         self.vars = {}
         self.data = {}
         for key, value in raw_patch.items():
-            # extract annotation
-            annotated_key = AnnotatedKey(key, annotation_config)
-
-            # extract changes and vars
             try:
+                # extract changes from annotation
+                annotated_key = AnnotatedKey(key, annotation_config)
                 changes = self.extract_changes(annotated_key.annotation, value)
-            except ValueError as err:
-                raise PatchworkInputError(
-                    f"Error found in patch file while processing key '{key}': {err}"
-                )
+            except PatchworkInputError as err:
+                raise PatchworkInputError(f"{self.path + key}: {err}")
             self.data[annotated_key.key] = []
             for change in changes:
                 if change.operation == "var":
@@ -73,7 +73,7 @@ class Patch:
         # 'change' operation allows to specify the changes explicitly
         if annotation.operation == "change":
             if not isinstance(value, list):
-                raise ValueError(
+                raise PatchworkInputError(
                     "A change operation takes a list of dictionaries as parameter. "
                     f"Found value of type '{value_type(value)}' instead."
                 )

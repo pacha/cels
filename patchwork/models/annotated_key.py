@@ -4,7 +4,6 @@ from dataclasses import dataclass
 
 from .annotation import Annotation
 from .annotation_config import AnnotationConfig
-from patchwork.exceptions import PatchworkInputError
 
 
 @dataclass
@@ -30,9 +29,6 @@ class AnnotatedKey:
 
         # set attributes
         self.key = annotation_data.group(1)
-        try:
-            self.annotation = Annotation(
-                annotation_data.group(2), index_marker=annotation_config.index_marker
-            )
-        except PatchworkInputError as err:
-            raise PatchworkInputError(f"Invalid annotated key '{self.key}' > {err}")
+        self.annotation = Annotation(
+            annotation_data.group(2), index_marker=annotation_config.index_marker
+        )
