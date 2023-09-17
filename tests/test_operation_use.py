@@ -1,7 +1,4 @@
-import pytest
-
 from patchwork.services import patch_dictionary
-from patchwork.exceptions import PatchworkInputError
 
 
 def test_operation_use_simple():

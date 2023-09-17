@@ -29,6 +29,10 @@ class AnnotatedKey:
 
         # set attributes
         self.key = annotation_data.group(1)
-        self.annotation = Annotation(
-            annotation_data.group(2), index_marker=annotation_config.index_marker
-        )
+        if annotation_data.group(2):
+            self.annotation = Annotation(
+                annotation_data.group(2), index_marker=annotation_config.index_marker
+            )
+        else:
+            # if the annotation is empty (eg. "foo {}")
+            self.annotation = None

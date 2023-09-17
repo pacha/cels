@@ -1,5 +1,5 @@
 from patchwork.lib.values import show_value
-from patchwork.lib.values import value_type
+from patchwork.lib.values import show_index
 from patchwork.exceptions import PatchworkInputError
 
 
@@ -8,5 +8,5 @@ def safe_set(container, index, value):
         container[index] = value
     except Exception as err:
         raise PatchworkInputError(
-            f"Can't set value {show_value(value)} at index {index} in container {show_value(container)}: {err}."
+            f"Cannot set value {show_value(value)} at {show_index(index, container)}: {err}"
         )

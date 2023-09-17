@@ -1,0 +1,75 @@
+{
+  "only_in_input": 1,
+  "in_both": 3,
+  "in_both_but_changed": 4,
+  "nested": {
+    "bar": 1,
+    "baz": 2
+  },
+  "nested_literal": {
+    "bar": 1,
+    "baz": 2
+  },
+  "old name": 100,
+  "to-delete": 200,
+  "multiple_changes": [
+    "a",
+    "b"
+  ],
+  "list1": [
+    "foo",
+    [
+      "one",
+      [
+        "up",
+        "mid",
+        "down"
+      ],
+      "three"
+    ],
+    "baz"
+  ],
+  "list2.1": [
+    "a",
+    "b"
+  ],
+  "list3.1": [
+    "a",
+    "b"
+  ],
+  "list4.1": [
+    "foo",
+    [
+      "one",
+      [
+        "up",
+        "mid",
+        "down"
+      ]
+    ]
+  ],
+  "list2.2": [
+    "a",
+    "b"
+  ],
+  "list3.2": [
+    "a",
+    "b"
+  ],
+  "list4.2": [
+    "foo",
+    [
+      "one",
+      [
+        "up",
+        "mid",
+        "down"
+      ]
+    ]
+  ],
+  "to_link": {
+    "one": {
+      "two": 100
+    }
+  }
+}

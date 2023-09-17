@@ -4,6 +4,7 @@ operations:
     description: Perform multiple operations on a single key.
     takes_indices: false
     takes_underscore_index: false
+    requires_value: true
     value_type: "list[dict[str, Any]]"
     notes: >-
       For the 'change' operation, it is necessary to provide a list of
@@ -33,13 +34,15 @@ operations:
     description: Delete an dictionary item or an element from a list.
     takes_indices: true
     takes_underscore_index: false
-    value_type: "None"
+    requires_value: false
+    value_type: "Any"
     notes: >-
       When no index is provided, the current key/value pair is deleted. If an
       index is provided, then the key/value pair or the list element pointed by
       the index is deleted. Trying to delete a non-existing key or element is
       allowed and results in a no-operation (the application will emit a warning, though).
-      The value provided is not used and it is advised to use null/None.
+      The value provided is ignored (it is advised to use 'null' for JSON and YAML, "" for
+      TOML and None when directly using Python dictionaries).
     examples:
       - title: "Delete key/value pair"
         code: |
@@ -83,6 +86,7 @@ operations:
     description: Concatenate a list to a existing one.
     takes_indices: true
     takes_underscore_index: true
+    requires_value: true
     value_type: "list"
     notes: >-
       The 'extend' operation always takes a list as parameter. If no index is
@@ -129,6 +133,7 @@ operations:
     description: Add an element to a list.
     takes_indices: true
     takes_underscore_index: true
+    requires_value: true
     value_type: "Any"
     notes: >-
       If no index is provided, the passed value is appended at the end of the
@@ -173,12 +178,12 @@ operations:
     description: Don't perform any action on the item. 
     takes_indices: true
     takes_underscore_index: false
-    value_type: "None"
+    requires_value: false
+    value_type: "Any"
     notes: >-
       Keys in input data that are not specified in patch data are kept by
       default. Therefore, manually setting this operation manually is usually
-      not required. For this operation, the value must be 'null' as it is not
-      used.
+      not required. For this operation, the provided value is ignored.
     examples:
       - title: "Keep key"
         code: |
@@ -205,6 +210,7 @@ operations:
     description: Create or replace an item with the value obtained from copying a branch of the input document.
     takes_indices: true
     takes_underscore_index: false
+    requires_value: true
     value_type: "str"
     notes: >-
       The 'link' operation takes a path -using dot notation (eg. .key1.key2.element[3])-
@@ -270,6 +276,7 @@ operations:
     description: Apply a patch dictionary.
     takes_indices: true
     takes_underscore_index: false
+    requires_value: true
     value_type: "dict"
     notes: >-
       The 'patch' operation is the base of Patchwork. Most of the time it doesn't have
@@ -336,6 +343,7 @@ operations:
     description: Rename a dictionary key.
     takes_indices: false
     takes_underscore_index: false
+    requires_value: true
     value_type: "str | int | bool | None"
     notes: >-
       The 'rename' operation takes the new name of the key as parameter. If no
@@ -370,6 +378,7 @@ operations:
     description: Create a new item with a string rendered using variables defined with 'var'.
     takes_indices: true
     takes_underscore_index: false
+    requires_value: true
     value_type: "str"
     notes: >-
       The 'render' operation takes a template string as a parameter, then the
@@ -417,6 +426,7 @@ operations:
     description: Create or replace an item.
     takes_indices: true
     takes_underscore_index: false
+    requires_value: true
     value_type: "Any"
     notes: >-
       The 'set' operation is the default one for scalar and list values. That
@@ -487,6 +497,7 @@ operations:
     description: Create or replace an item using the value of a variable defined with 'var'.
     takes_indices: true
     takes_underscore_index: false
+    requires_value: true
     value_type: "str"
     notes: >-
       The 'use' operation works like the 'set' operation but takes the name of
@@ -523,6 +534,7 @@ operations:
     description: Define a variable.
     takes_indices: false
     takes_underscore_index: false
+    requires_value: true
     value_type: "Any"
     notes: >-
       The 'var' operation doesn't have a direct effect in the output document,

@@ -9,6 +9,6 @@ def safe_del(container, index):
         del container[index]
     except Exception:
         raise PatchworkInputError(
-            f"Cannot delete {show_index(index, container)} "
+            f"Cannot delete element with {show_index(index, container)} "
             f"from {show_value(container)}"
         )

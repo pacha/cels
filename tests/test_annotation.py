@@ -33,6 +33,12 @@ def test_annotation_set_with_negative_index():
     assert annotation.indices == [-2]
 
 
+def test_annotation_empty_annotation():
+    """Annotations can't be empty."""
+    with pytest.raises(PatchworkInputError):
+        _ = Annotation("")
+
+
 def test_annotation_wrong_operation():
     """Test wrong annotation operation."""
     with pytest.raises(PatchworkInputError):

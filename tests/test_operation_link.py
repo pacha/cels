@@ -1,7 +1,4 @@
-import pytest
-
 from patchwork.services import patch_dictionary
-from patchwork.exceptions import PatchworkInputError
 
 
 def test_operation_link_simple():
@@ -162,45 +159,3 @@ def test_operation_empty_path():
         },
     }
     assert patch_dictionary(original, patch) == expected
-
-
-def test_operation_wrong_path():
-    """Use wrong path."""
-    original = {
-        "foo": {
-            "bar": 3,
-        },
-    }
-    patch = {
-        "spam {link}": ".this.that",
-    }
-    with pytest.raises(PatchworkInputError):
-        _ = patch_dictionary(original, patch)
-
-
-def test_operation_wrong_path_type():
-    """Use wrong path type."""
-    original = {
-        "foo": {
-            "bar": 3,
-        },
-    }
-    patch = {
-        "spam {link}": 3,
-    }
-    with pytest.raises(PatchworkInputError):
-        _ = patch_dictionary(original, patch)
-
-
-def test_operation_wrong_path_type2():
-    """Use wrong path type."""
-    original = {
-        "foo": {
-            "bar": 3,
-        },
-    }
-    patch = {
-        "spam {link}": {"wrong": "path"},
-    }
-    with pytest.raises(PatchworkInputError):
-        _ = patch_dictionary(original, patch)

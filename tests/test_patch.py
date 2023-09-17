@@ -1,5 +1,4 @@
 from patchwork.models import Patch
-from patchwork.models import Operation
 
 
 def test_patch_empty():

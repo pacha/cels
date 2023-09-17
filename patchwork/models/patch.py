@@ -38,6 +38,8 @@ class Patch:
         self.parent_patch = parent_patch
         self.annotation_config = annotation_config
         self.path = path
+
+        # set data and vars
         self.vars = {}
         self.data = {}
         for key, value in raw_patch.items():
@@ -75,7 +77,7 @@ class Patch:
             if not isinstance(value, list):
                 raise PatchworkInputError(
                     "A change operation takes a list of dictionaries as parameter. "
-                    f"Found value of type '{value_type(value)}' instead."
+                    f'Found value of type "{value_type(value)}" instead'
                 )
             changes = []
             for raw_change in value:

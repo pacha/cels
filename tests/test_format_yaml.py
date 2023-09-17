@@ -328,33 +328,21 @@ def test_yaml_nested_list_set_negative_index():
     assert output == result
 
 
-def test_yaml_multiple_changes():
+def test_yaml_empty_annotation():
     input = cleandoc(
         """
 
     foo:
       bar: 1
       baz: 2
-    my_list:
-    - foo
-    - - one
-      - - "up"
-        - "mid"
-        - "down"
-      - three
-    - baz
-    spam: {"eggs": null}
 
     """
     )
     patch = cleandoc(
         """
 
-    foo:
+    foo {}:
       baz: 100
-    my_list {set@1, -2, 2}: 100
-    spam: {"eggs": "a lot"}
-
     """
     )
     result = cleandoc(
@@ -363,19 +351,20 @@ def test_yaml_multiple_changes():
     foo:
       bar: 1
       baz: 100
-    my_list:
-    - foo
-    - - one
-      - - up
-        - mid
-        - 100
-      - three
-    - baz
-    spam:
-      eggs: a lot
-
     """
     )
+
+    output = patch_yaml(input, patch).strip()
+    assert output == result
+
+
+def test_yaml_multiple_changes(fixtures_path):
+    input_path = fixtures_path / "full-example-yaml" / "input.yaml"
+    input = cleandoc(input_path.read_text())
+    patch_path = fixtures_path / "full-example-yaml" / "patch.yaml"
+    patch = cleandoc(patch_path.read_text())
+    result_path = fixtures_path / "full-example-yaml" / "result.yaml"
+    result = cleandoc(result_path.read_text())
 
     output = patch_yaml(input, patch).strip()
     assert output == result

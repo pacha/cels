@@ -1,5 +1,3 @@
-import pytest
-
 from patchwork.services import patch_dictionary
 
 
@@ -59,4 +57,18 @@ def test_operation_rename_wrong_empty_string():
         "foo {rename}": "",
     }
     expected = {"": 1}
+    assert patch_dictionary(original, patch) == expected
+
+
+def test_operation_rename_non_string_key():
+    """Just a rename operation."""
+    original = {
+        "foo": "bar",
+    }
+    patch = {
+        "foo {rename}": 2,
+    }
+    expected = {
+        2: "bar",
+    }
     assert patch_dictionary(original, patch) == expected

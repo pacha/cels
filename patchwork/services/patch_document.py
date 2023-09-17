@@ -14,6 +14,7 @@ import tomli_w
 
 from patchwork import default
 from patchwork.exceptions import PatchworkInputError
+
 from .patch_dictionary import patch_dictionary
 
 
@@ -31,7 +32,7 @@ dump_functions: Dict[str, Callable] = {
 
 dump_parameters: Dict[str, Dict[str, Any]] = {
     "yaml": {"sort_keys": False},
-    "json": {},
+    "json": {"indent": 2},
     "toml": {},
 }
 

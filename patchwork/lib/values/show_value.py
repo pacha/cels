@@ -27,4 +27,4 @@ def show_value(value, width=50, placeholder="..."):
                 ", ".join(str_elements), width=width, placeholder=placeholder
             )
             return f"list with {list_length} elements [{shortened_elements}]"
-    return shorten(str(value), width=width, placeholder=placeholder)
+    return f'"{shorten(str(value), width=width, placeholder=placeholder)}"'

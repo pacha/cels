@@ -14,5 +14,5 @@ def make_safe(container):
         return MutatedList(container)
     raise PatchworkInputError(
         f"Expected element of type list or dictionary, "
-        f"found {show_value(container)} of type {value_type(container)}."
+        f"found value {show_value(container)} of type {value_type(container)}."
     )

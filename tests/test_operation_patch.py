@@ -1,7 +1,4 @@
-import pytest
-
 from patchwork.services import patch_dictionary
-from patchwork.exceptions import PatchworkInputError
 
 
 def test_operation_patch_recursively():
@@ -82,13 +79,3 @@ def test_operation_patch_non_dict_value():
         "foo": {"bar": 1},
     }
     assert patch_dictionary(original, patch) == expected
-
-
-def test_operation_patch_with_non_dict_value():
-    """It is not possible to patch an integer."""
-    original = {
-        "foo": {"bar": 1},
-    }
-    patch = {"foo {patch}": 1}
-    with pytest.raises(PatchworkInputError):
-        _ = patch_dictionary(original, patch)

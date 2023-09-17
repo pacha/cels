@@ -11,6 +11,8 @@ def value_type(value: Any) -> str:
         return "number/integer"
     if isinstance(value, float) or value is float:
         return "number/float"
+    if value is list:
+        return "list"
     if value is None:
         return "null/None"
     try:

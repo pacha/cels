@@ -1,0 +1,45 @@
+in_both = 3
+in_both_but_changed = 5
+"old name {rename}" = "new name"
+"to-delete {delete}" = ""
+"list1 {set@1, -2, 2}" = 100
+"list2.1 {insert}" = "c"
+"list3.1 {insert@1}" = "c"
+"list4.1 {insert@1,1,_}" = 100
+"list2.2 {extend}" = [
+    "c",
+]
+"list3.2 {extend@1}" = [
+    "c",
+]
+"list4.2 {extend@1,1,_}" = [
+    100,
+]
+"linked {link}" = ".to_link"
+"use_var1 {use}" = "my_var"
+"use_var2 {use}" = "my_var"
+"rendered {render}" = "some-text-{{ my_var.foo.bar }}!"
+only_in_patch = 2
+
+[nested]
+baz = 100
+
+["nested_literal {set}"]
+baz = 100
+
+[["multiple_changes {change}"]]
+operation = "rename"
+value = "multiple"
+
+[["multiple_changes {change}"]]
+operation = "insert"
+value = "c"
+
+[["multiple_changes {change}"]]
+operation = "delete"
+indices = [
+    0,
+]
+
+["my_var {var}".foo]
+bar = 100

@@ -1,7 +1,4 @@
-import pytest
-
 from patchwork.services import patch_dictionary
-from patchwork.exceptions import PatchworkInputError
 
 
 def test_operation_render_simple():
@@ -84,5 +81,33 @@ def test_operation_render_in_nested_list():
     }
     expected = {
         "bar": [[["a0", "a2", "a3"], ["b0", "some-prefix-some-id", "b3"]], 0],
+    }
+    assert patch_dictionary(original, patch) == expected
+
+
+def test_operation_render_dict():
+    """Render a full dictionary instead of a scalar."""
+    original = {}
+    patch = {
+        "foo {var}": {
+            "bar": {"baz": 100},
+        },
+        "bar {render}": "{{ foo }}",
+    }
+    expected = {
+        "bar": "{'bar': {'baz': 100}}",
+    }
+    assert patch_dictionary(original, patch) == expected
+
+
+def test_operation_render_built_in_filter():
+    """Render a full dictionary instead of a scalar."""
+    original = {}
+    patch = {
+        "foo {var}": [1, 2, 3, 4],
+        "bar {render}": "{{ foo|sum }}",
+    }
+    expected = {
+        "bar": "10",
     }
     assert patch_dictionary(original, patch) == expected

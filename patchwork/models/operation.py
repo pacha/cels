@@ -32,6 +32,7 @@ class Operation:
     examples: List[Dict[str, str]]
     takes_indices: bool
     takes_underscore_index: bool
+    requires_value: bool
     value_type: Any
 
     @classmethod
@@ -43,11 +44,12 @@ class Operation:
         examples: list,
         takes_indices: bool,
         takes_underscore_index: bool,
+        requires_value: bool,
         value_type: str,
     ) -> "Operation":
         if not takes_indices and takes_underscore_index:
             raise PatchworkInternalError(
-                "Operations can have 'takes_underscore_index' set to true if 'takes_indices' is set to false."
+                "Operations can have 'takes_underscore_index' set to true if 'takes_indices' is set to false"
             )
         instance = cls(
             name,
@@ -56,6 +58,7 @@ class Operation:
             examples,
             takes_indices,
             takes_underscore_index,
+            requires_value,
             hints_map[value_type],
         )
         cls.instances[name] = instance

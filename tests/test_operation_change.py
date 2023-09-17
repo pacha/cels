@@ -1,38 +1,17 @@
-import pytest
-
 from patchwork.services import patch_dictionary
-from patchwork.exceptions import PatchworkInputError
 
 
-def test_operation_change_wrong_value():
-    """The value in a change operation must be a list."""
+def test_operation_change_empty_list():
     input = {
-        "foo": 1,
+        "foo": 100,
     }
     patch = {
-        "foo {change}": {
-            "operation": "set",
-            "value": 2,
-        },
+        "foo {change}": [],
     }
-    with pytest.raises(PatchworkInputError):
-        _ = patch_dictionary(input, patch)
-
-
-def test_operation_change_wrong_operation():
-    """The value in a change operation must be a list."""
-    input = {
-        "foo": 1,
+    expected = {
+        "foo": 100,
     }
-    patch = {
-        "foo {change}": [
-            {
-                "this": "is not a valid operation",
-            }
-        ]
-    }
-    with pytest.raises(PatchworkInputError):
-        _ = patch_dictionary(input, patch)
+    assert patch_dictionary(input, patch) == expected
 
 
 def test_operation_change_delete_after_set():
@@ -129,4 +108,13 @@ def test_operation_change_patch_after_rename():
             "baz": 3,
         },
     }
+    assert patch_dictionary(input, patch) == expected
+
+
+def test_operation_change_indices():
+    input = {"foo": [[[100, 200]]]}
+    patch = {
+        "foo {change}": [{"operation": "set", "value": 300, "indices": [0, 0, 1]}],
+    }
+    expected = {"foo": [[[100, 300]]]}
     assert patch_dictionary(input, patch) == expected

@@ -3,6 +3,7 @@ from typing import Any
 from dataclasses import dataclass
 
 from patchwork import default
+from patchwork.lib.values import show_value
 from patchwork.exceptions import PatchworkInputError
 
 
@@ -29,7 +30,7 @@ class AnnotationConfig:
 
         # annotation regex
         pattern = (
-            f"^(.+){ self.separator }{ self.left_marker }(.+){ self.right_marker }$"
+            f"^(.+){ self.separator }{ self.left_marker }(.*){ self.right_marker }$"
         )
         self.regex = re.compile(pattern)
 
@@ -39,9 +40,9 @@ class AnnotationConfig:
             for child_key, child_value in value.items():
                 if self.regex.match(child_key):
                     raise PatchworkInputError(
-                        f"Can't apply operation in annotated key '{child_key}': "
-                        "annotations are not valid in dictionaries used as value "
-                        "for a 'set' operation."
+                        f"Cannot perform operation in annotated key {show_value(child_key)}: "
+                        "annotations are not allowed if a parent/ancestor key performs an explicit "
+                        '"set" operation'
                     )
                 self.check_no_annotations(child_value)
         elif isinstance(value, list):

@@ -55,7 +55,7 @@ class Path:
             left_separator, right_separator = ".", ""
 
         # get escape characters
-        part_str = str(part)
+        part_str = str(part) if part is not None else "<null>"
         if special_chars_pattern.search(part_str):
             left_escape, right_escape = '"', '"'
         else:
@@ -81,7 +81,7 @@ class Path:
             for r in re.finditer(expr_pattern, self.expr)
         ]
         if not parts and self.expr not in ("", "."):
-            raise PatchworkInputError(f"Impossible to parse path '{self.expr}'")
+            raise PatchworkInputError(f'Impossible to parse path "{self.expr}"')
 
         # traverse data
         value = data
@@ -91,6 +91,6 @@ class Path:
                 value = value[index]
             except (KeyError, IndexError, TypeError):
                 raise PatchworkInputError(
-                    f"Impossible to find path element '{part}' while looking for '{self}'."
+                    f'Impossible to find path element "{part}" while looking for "{self}"'
                 )
         return value

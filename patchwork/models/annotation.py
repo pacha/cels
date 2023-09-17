@@ -30,7 +30,7 @@ class Annotation:
                 f"Annotation {raw_annotation} is invalid. "
                 f"Annotations should follow the pattern 'operation[@index1[,index2[,index3[,...]]]'. "
                 "Indices must be integers (positive and negative numbers are allowed). "
-                "In the case of 'insert' and 'extend' operations, the rightmost index can be '_'."
+                "In the case of 'insert' and 'extend' operations, the rightmost index can be '_'"
             )
 
         # set operation
@@ -52,8 +52,7 @@ class Annotation:
             # check that the operation takes indices
             if not self.operation.takes_indices:
                 raise PatchworkInputError(
-                    f"Operation '{self.operation}' can't take any indices. "
-                    f"Indices found '{indices_list}'."
+                    f"{show_value(self.operation)} operation cannot take any indices"
                 )
 
             # convert indices to integer type
@@ -62,18 +61,19 @@ class Annotation:
                 # if a underscore has been found, it should be the last element
                 if underscore_present:
                     raise PatchworkInputError(
-                        f"Invalid index {index_str}: underescore indices must always be in last position."
+                        f"Invalid index {show_value(index_str)}: "
+                        "underescore indices must always be in last position"
                     )
                 try:
                     self.indices.append(int(index_str))
                 except ValueError:
                     if index_str != "_":
                         raise PatchworkInputError(
-                            f"Invalid index '{index_str}'. Indices can only be integers or '_'."
+                            f"Invalid index {show_value(index_str)}. Indices can only be integers or '_'"
                         )
                     if not self.operation.takes_underscore_index:
                         raise PatchworkInputError(
-                            f"Operation {self.operation} can't take a underscore index."
+                            f"{show_value(self.operation)} operation cannot take a underscore index"
                         )
                     underscore_present = True
                     self.indices.append(None)

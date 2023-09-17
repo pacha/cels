@@ -11,6 +11,7 @@ from typeguard import TypeCheckError
 
 from .actions import actions
 from .operation import Operation
+from patchwork.lib.values import show_value
 from patchwork.lib.values import value_type
 from patchwork.exceptions import PatchworkInputError
 
@@ -33,15 +34,13 @@ class Change:
                 check_type(value, operation.value_type)
             except TypeCheckError:
                 raise PatchworkInputError(
-                    f"Can't execute operation '{operation}' with the value found in "
-                    f"the patch dictionary: '{value}'. "
-                    f"This operation requires a patch value of type '{value_type(operation.value_type)}' "
-                    f"instead of type '{value_type(value)}'."
+                    f"Cannot execute operation {show_value(operation)} with value {show_value(value)}. "
+                    f"This operation requires a value of type {value_type(operation.value_type)}"
                 )
             # check that the operation takes indices
             if not operation.takes_indices and indices:
                 raise PatchworkInputError(
-                    f"Operation '{operation}' can't take indices '{indices}'."
+                    f"Operation {show_value(operation)} cannot take indices (provided {show_value(indices)})"
                 )
 
         # set fields
@@ -56,26 +55,38 @@ class Change:
         try:
             operation_name = data["operation"]
         except KeyError:
-            raise PatchworkInputError(
-                f"Missing 'operation' key in dictionary part of a 'change' list: {data}"
-            )
+            raise PatchworkInputError(f"Missing 'operation' key in {show_value(data)}")
         try:
             operation = Operation.get(operation_name)
         except KeyError:
             raise PatchworkInputError(
-                f"The operation '{operation_name}' provided in the change list is not valid. "
-                f"Valid operations are: {Operation.show_names()}."
+                f"Wrong operation: {show_value(operation_name)} in change list"
             )
 
         # for some operations, it is fine to not to specify value
         value_missing = "value" not in data
         if value_missing:
-            if operation.value_type is not None:
-                raise PatchworkInputError(
-                    f"Missing 'value' key in dictionary part of a 'change' list: {data}"
-                )
+            if operation.requires_value:
+                raise PatchworkInputError(f"Missing 'value' key in {show_value(data)}")
             else:
                 data["value"] = None
+
+        # indices must me a list of integers
+        indices = data.get("indices", [])
+        if not isinstance(indices, list):
+            raise PatchworkInputError(
+                f"'indices' field must be of type list instead of {value_type(indices)}"
+            )
+        for index in indices:
+            if not isinstance(index, int) or index == "_":
+                raise PatchworkInputError("'indices' field must be a list of integers")
+
+        # check no extra fields
+        extra_fields = set(data.keys()) - {"operation", "value", "indices"}
+        if extra_fields:
+            raise PatchworkInputError(
+                f"Found invalid keys in change dictionary: {show_value(extra_fields)}"
+            )
 
         # create change object
         try:
@@ -102,14 +113,6 @@ class Change:
         if self.operation:
             operation_name = self.operation.name
         else:
-            # try:
-            #     input_value_is_dict = isinstance(output_dict[key], dict)
-            # except KeyError:
-            #     input_value_is_dict = False
-            # patch_value_is_dict = isinstance(self.value, dict)
-            # operation_name = (
-            #     "patch" if input_value_is_dict and patch_value_is_dict else "set"
-            # )
             patch_value_is_dict = isinstance(self.value, dict)
             operation_name = "patch" if patch_value_is_dict else "set"
 

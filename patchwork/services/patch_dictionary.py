@@ -1,15 +1,13 @@
 from typing import Optional
 
+from patchwork import default
 from patchwork.logs import log
 from patchwork.models import Path
 from patchwork.models import Patch
 from patchwork.models import KeyLocation
 from patchwork.models import AnnotationConfig
-from patchwork.exceptions import PatchworkInputError
 from patchwork.exceptions import PatchworkActionPatch
 from patchwork.exceptions import PatchworkActionRename
-
-from patchwork import default
 
 
 def patch_dictionary(
