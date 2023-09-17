@@ -4,7 +4,7 @@ from typing import Union
 from dataclasses import dataclass
 
 from patchwork import default
-from patchwork.lib.values import show_value
+from patchwork.lib.show import show
 from patchwork.exceptions import PatchworkInputError
 from .operation import Operation
 
@@ -39,7 +39,7 @@ class Annotation:
             self.operation = Operation.get(operation_name)
         except KeyError:
             raise PatchworkInputError(
-                f"Invalid operation {show_value(operation_name)}. "
+                f"Invalid operation {show(operation_name)}. "
                 f"Valid operations are [{', '.join([str(operation) for operation in Operation.get_all()])}]"
             )
 
@@ -52,7 +52,7 @@ class Annotation:
             # check that the operation takes indices
             if not self.operation.takes_indices:
                 raise PatchworkInputError(
-                    f"{show_value(self.operation)} operation cannot take any indices"
+                    f"{show(self.operation)} operation cannot take any indices"
                 )
 
             # convert indices to integer type
@@ -61,7 +61,7 @@ class Annotation:
                 # if a underscore has been found, it should be the last element
                 if underscore_present:
                     raise PatchworkInputError(
-                        f"Invalid index {show_value(index_str)}: "
+                        f"Invalid index {show(index_str)}: "
                         "underescore indices must always be in last position"
                     )
                 try:
@@ -69,11 +69,11 @@ class Annotation:
                 except ValueError:
                     if index_str != "_":
                         raise PatchworkInputError(
-                            f"Invalid index {show_value(index_str)}. Indices can only be integers or '_'"
+                            f"Invalid index {show(index_str)}. Indices can only be integers or '_'"
                         )
                     if not self.operation.takes_underscore_index:
                         raise PatchworkInputError(
-                            f"{show_value(self.operation)} operation cannot take a underscore index"
+                            f"{show(self.operation)} operation cannot take a underscore index"
                         )
                     underscore_present = True
                     self.indices.append(None)

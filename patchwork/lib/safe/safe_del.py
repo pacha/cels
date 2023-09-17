@@ -1,5 +1,5 @@
-from patchwork.lib.values import show_index
-from patchwork.lib.values import show_value
+from patchwork.lib.show import show_index
+from patchwork.lib.show import show
 from patchwork.exceptions import PatchworkInputError
 
 
@@ -10,5 +10,5 @@ def safe_del(container, index):
     except Exception:
         raise PatchworkInputError(
             f"Cannot delete element with {show_index(index, container)} "
-            f"from {show_value(container)}"
+            f"from {show(container)}"
         )

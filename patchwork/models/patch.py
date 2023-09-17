@@ -12,7 +12,7 @@ from .key_location import KeyLocation
 from .annotated_key import AnnotatedKey
 from .annotation_config import AnnotationConfig
 from patchwork.exceptions import PatchworkInputError
-from patchwork.lib.values import value_type
+from patchwork.lib.show import show_type
 
 
 @dataclass
@@ -77,7 +77,7 @@ class Patch:
             if not isinstance(value, list):
                 raise PatchworkInputError(
                     "A change operation takes a list of dictionaries as parameter. "
-                    f'Found value of type "{value_type(value)}" instead'
+                    f'Found value of type "{show_type(value)}" instead'
                 )
             changes = []
             for raw_change in value:

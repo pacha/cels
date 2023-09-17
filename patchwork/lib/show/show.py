@@ -1,8 +1,8 @@
 from textwrap import shorten
 
 
-def show_value(value, width=50, placeholder="..."):
-    """Return a safe string that represents the given value."""
+def show(value, width=50, placeholder="..."):
+    """Return a safe string that represents the given object."""
     if isinstance(value, str):
         return shorten(f'"{value}"', width=width, placeholder=placeholder)
     if isinstance(value, dict):

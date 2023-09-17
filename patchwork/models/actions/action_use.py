@@ -1,6 +1,6 @@
 from patchwork.lib.safe import safe_set
 from patchwork.lib.safe import safe_traverse
-from patchwork.lib.values import show_value
+from patchwork.lib.show import show
 from patchwork.exceptions import PatchworkInputError
 from . import action
 
@@ -16,7 +16,7 @@ def action_use(output_dict, key, indices, change_value, patch, path, root_input_
     try:
         var_value = patch.get_var(change_value)
     except KeyError:
-        raise PatchworkInputError(f"Variable {show_value(change_value)} not defined.")
+        raise PatchworkInputError(f"Variable {show(change_value)} not defined.")
 
     # perform action
     safe_set(container, index, var_value)

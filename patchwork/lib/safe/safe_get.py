@@ -1,4 +1,4 @@
-from patchwork.lib.values import show_value
+from patchwork.lib.show import show
 from patchwork.exceptions import PatchworkInputError
 
 
@@ -7,8 +7,8 @@ def safe_get(container, index):
     try:
         return container[index]
     except KeyError:
-        raise PatchworkInputError(f"Cannot find key {show_value(index)}.")
+        raise PatchworkInputError(f"Cannot find key {show(index)}.")
     except IndexError:
-        raise PatchworkInputError(f"Cannot find index {show_value(index)}.")
+        raise PatchworkInputError(f"Cannot find index {show(index)}.")
     except Exception:
-        raise PatchworkInputError(f"Cannot find element at {show_value(index)}.")
+        raise PatchworkInputError(f"Cannot find element at {show(index)}.")

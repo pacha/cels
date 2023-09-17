@@ -3,7 +3,7 @@ from typing import Any
 from dataclasses import dataclass
 
 from patchwork import default
-from patchwork.lib.values import show_value
+from patchwork.lib.show import show
 from patchwork.exceptions import PatchworkInputError
 
 
@@ -40,7 +40,7 @@ class AnnotationConfig:
             for child_key, child_value in value.items():
                 if self.regex.match(child_key):
                     raise PatchworkInputError(
-                        f"Cannot perform operation in annotated key {show_value(child_key)}: "
+                        f"Cannot perform operation in annotated key {show(child_key)}: "
                         "annotations are not allowed if a parent/ancestor key performs an explicit "
                         '"set" operation'
                     )

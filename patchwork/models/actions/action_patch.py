@@ -1,7 +1,4 @@
-from patchwork.lib.safe import safe_get
 from patchwork.lib.safe import safe_traverse
-from patchwork.lib.values import value_type
-from patchwork.exceptions import PatchworkInputError
 from patchwork.exceptions import PatchworkActionPatch
 from . import action
 

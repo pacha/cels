@@ -1,5 +1,5 @@
-from patchwork.lib.values import show_value
-from patchwork.lib.values import value_type
+from patchwork.lib.show import show
+from patchwork.lib.show import show_type
 from patchwork.exceptions import PatchworkInputError
 from .mutated_dict import MutatedDict
 from .mutated_list import MutatedList
@@ -14,5 +14,5 @@ def make_safe(container):
         return MutatedList(container)
     raise PatchworkInputError(
         f"Expected element of type list or dictionary, "
-        f"found value {show_value(container)} of type {value_type(container)}."
+        f"found value {show(container)} of type {show_type(container)}."
     )
