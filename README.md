@@ -1,10 +1,10 @@
 
-Patchwork
-=========
+Cels
+====
 
-![Tests](https://github.com/pacha/patchwork/actions/workflows/tests.yaml/badge.svg)
-![Type checks](https://github.com/pacha/patchwork/actions/workflows/type-checks.yaml/badge.svg)
-![Code formatting](https://github.com/pacha/patchwork/actions/workflows/code-formatting.yaml/badge.svg)
+![Tests](https://github.com/pacha/cels/actions/workflows/tests.yaml/badge.svg)
+![Type checks](https://github.com/pacha/cels/actions/workflows/type-checks.yaml/badge.svg)
+![Code formatting](https://github.com/pacha/cels/actions/workflows/code-formatting.yaml/badge.svg)
 
 Patch your YAML, JSON, TOML files or Python dictionaries.
 

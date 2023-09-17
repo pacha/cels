@@ -1,6 +1,6 @@
 from inspect import cleandoc
 
-from patchwork import patch_yaml
+from cels import patch_yaml
 
 
 def test_yaml_empty():

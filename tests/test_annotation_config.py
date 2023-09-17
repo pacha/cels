@@ -3,8 +3,8 @@ from dataclasses import dataclass
 
 import pytest
 
-from patchwork.models import AnnotationConfig
-from patchwork.exceptions import PatchworkInputError
+from cels.models import AnnotationConfig
+from cels.exceptions import CelsInputError
 
 
 @dataclass

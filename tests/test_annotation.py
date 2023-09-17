@@ -1,8 +1,8 @@
 import pytest
 
-from patchwork.models import Operation
-from patchwork.models import Annotation
-from patchwork.exceptions import PatchworkInputError
+from cels.models import Operation
+from cels.models import Annotation
+from cels.exceptions import CelsInputError
 
 
 def test_annotation_create():
@@ -35,23 +35,23 @@ def test_annotation_set_with_negative_index():
 
 def test_annotation_empty_annotation():
     """Annotations can't be empty."""
-    with pytest.raises(PatchworkInputError):
+    with pytest.raises(CelsInputError):
         _ = Annotation("")
 
 
 def test_annotation_wrong_operation():
     """Test wrong annotation operation."""
-    with pytest.raises(PatchworkInputError):
+    with pytest.raises(CelsInputError):
         _ = Annotation("fly@1")
 
 
 def test_annotation_wrong_index():
     """Test wrong annotation index."""
-    with pytest.raises(PatchworkInputError):
+    with pytest.raises(CelsInputError):
         _ = Annotation("set@foo")
 
 
 def test_annotation_wrong_syntax():
     """Test wrong annotation syntax."""
-    with pytest.raises(PatchworkInputError):
+    with pytest.raises(CelsInputError):
         _ = Annotation("set$1")

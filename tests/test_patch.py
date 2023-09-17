@@ -1,4 +1,4 @@
-from patchwork.models import Patch
+from cels.models import Patch
 
 
 def test_patch_empty():

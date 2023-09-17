@@ -1,6 +1,6 @@
 from inspect import cleandoc
 
-from patchwork import patch_toml
+from cels import patch_toml
 
 
 def test_toml_multiple_changes(fixtures_path):

@@ -1,4 +1,4 @@
-from patchwork.services import patch_dictionary
+from cels.services import patch_dictionary
 
 
 def test_operation_patch_recursively():

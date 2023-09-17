@@ -1,5 +1,5 @@
 [project]
-name = "patchwork"
+name = "cels"
 version = "0.7.0"
 authors = [
   { name="Andrés Sopeña Pérez", email="" },
@@ -24,8 +24,8 @@ dependencies = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/pacha/patchwork"
-"Bug Tracker" = "https://github.com/pacha/patchwork/issues"
+"Homepage" = "https://github.com/pacha/cels"
+"Bug Tracker" = "https://github.com/pacha/cels/issues"
 
 [build-system]
 requires = ["hatchling"]

@@ -1,8 +1,8 @@
 import pytest
 
-from patchwork.models import Change
-from patchwork.models import Operation
-from patchwork.exceptions import PatchworkInputError
+from cels.models import Change
+from cels.models import Operation
+from cels.exceptions import CelsInputError
 
 
 def test_change_create():
@@ -15,13 +15,13 @@ def test_change_create():
 
 def test_change_wrong_value_type():
     """Try to create a change object with a value unsupported by the provided operation."""
-    with pytest.raises(PatchworkInputError):
+    with pytest.raises(CelsInputError):
         _ = Change(operation=Operation.get("extend"), value="some string")
 
 
 def test_change_wrong_index():
     """Try to create a change object with a index unsupported by the provided operation."""
-    with pytest.raises(PatchworkInputError):
+    with pytest.raises(CelsInputError):
         _ = Change(operation=Operation.get("rename"), value="some string", indices=[3])
 
 
@@ -41,7 +41,7 @@ def test_change_missing_value():
         }
     )
 
-    with pytest.raises(PatchworkInputError):
+    with pytest.raises(CelsInputError):
         _ = Change.from_dict(
             {
                 "operation": "set",

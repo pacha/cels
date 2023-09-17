@@ -1,6 +1,6 @@
 from inspect import cleandoc
 
-from patchwork import patch_json
+from cels import patch_json
 
 
 def test_json_multiple_changes(fixtures_path):

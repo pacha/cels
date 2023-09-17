@@ -1,8 +1,8 @@
 import pytest
 
-from patchwork.logs import log
-from patchwork.services import patch_dictionary
-from patchwork.exceptions import PatchworkInputError
+from cels.logs import log
+from cels.services import patch_dictionary
+from cels.exceptions import CelsInputError
 
 
 def test_error_wrong_operation():
@@ -10,7 +10,7 @@ def test_error_wrong_operation():
     patch = {
         "foo {bar}": None,
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -20,7 +20,7 @@ def test_error_delete_from_empty_dict():
     patch = {
         "foo {delete}": None,
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -33,7 +33,7 @@ def test_error_delete_non_existent():
     patch = {
         "foo {delete}": None,
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -45,7 +45,7 @@ def test_error_delete_from_empty_list():
     patch = {
         "foo {delete@3}": None,
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -57,7 +57,7 @@ def test_error_delete_out_of_bounds():
     patch = {
         "foo {delete@3}": None,
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -69,7 +69,7 @@ def test_error_set_index_for_scalar():
     patch = {
         "foo {set@2}": 100,
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -81,7 +81,7 @@ def test_error_set_string_index():
     patch = {
         "foo {set@bar}": 100,
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -96,7 +96,7 @@ def test_error_set_negative_index_for_dict():
     patch = {
         "foo {set@-1}": 100,
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -109,7 +109,7 @@ def test_error_set_with_underscore():
     patch = {
         "foo {set@_}": 100,
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -121,7 +121,7 @@ def test_error_underscore_not_at_last_position():
     patch = {
         "foo {insert@1,_,1}": 300,
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -133,7 +133,7 @@ def test_error_index_provided_for_operation_without_index():
     patch = {
         "foo {rename@1}": "bar",
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -149,7 +149,7 @@ def test_error_annotation_after_set():
             },
         },
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -161,7 +161,7 @@ def test_error_change_wrong_type():
     patch = {
         "foo {change}": 200,
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -177,7 +177,7 @@ def test_error_change_wrong_value():
             "value": 2,
         },
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -193,7 +193,7 @@ def test_error_change_missing_operation():
             }
         ]
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -209,7 +209,7 @@ def test_error_change_wrong_operation():
             }
         ]
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -225,7 +225,7 @@ def test_error_change_missing_value():
             }
         ]
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -243,7 +243,7 @@ def test_error_change_wrong_index_type():
             }
         ]
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -261,7 +261,7 @@ def test_error_change_wrong_index_elements():
             }
         ]
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -279,7 +279,7 @@ def test_error_change_index_in_wrong_operation():
             }
         ]
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -298,7 +298,7 @@ def test_error_change_extra_field():
             }
         ]
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -311,7 +311,7 @@ def test_error_extend_empty_list_with_negative_index():
     patch = {
         "foo {extend@-1}": ["a", "b"],
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -324,7 +324,7 @@ def test_error_extend_empty_list_with_wrong_index():
     patch = {
         "foo {extend@1}": ["a", "b"],
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -337,7 +337,7 @@ def test_error_extend_out_of_bounds():
     patch = {
         "foo {extend@5}": ["a", "b"],
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -350,7 +350,7 @@ def test_error_extend_out_of_bounds_negative_index():
     patch = {
         "foo {extend@-6}": ["a", "b"],
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -363,7 +363,7 @@ def test_error_extend_with_non_list():
     patch = {
         "foo {extend@2}": ["a", "b"],
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -375,7 +375,7 @@ def test_error_extend_using_non_list_value():
     patch = {
         "foo {extend}": "a",
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -387,7 +387,7 @@ def test_error_extend_targeting_non_list_value():
     patch = {
         "foo {extend}": ["a"],
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -400,7 +400,7 @@ def test_error_insert_out_of_bounds():
     patch = {
         "foo {insert@5}": 100,
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -413,7 +413,7 @@ def test_error_insert_out_of_bounds_negative_index():
     patch = {
         "foo {insert@-6}": 100,
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -425,7 +425,7 @@ def test_error_insert_into_non_list():
     patch = {
         "foo {insert}": 100,
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -437,7 +437,7 @@ def test_error_insert_into_non_list_using_index():
     patch = {
         "foo {insert@5}": 100,
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -452,7 +452,7 @@ def test_error_wrong_path():
     patch = {
         "spam {link}": ".this.that",
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -467,7 +467,7 @@ def test_error_wrong_path_random_string():
     patch = {
         "spam {link}": "&)$(/(·",
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -482,7 +482,7 @@ def test_error_wrong_path_type():
     patch = {
         "spam {link}": 3,
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -497,7 +497,7 @@ def test_error_wrong_path_type_dict():
     patch = {
         "spam {link}": {"wrong": "path"},
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -508,7 +508,7 @@ def test_error_patch_with_non_dict_value():
         "foo": {"bar": 1},
     }
     patch = {"foo {patch}": 1}
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -521,7 +521,7 @@ def test_error_set_no_annotations_in_value_overriding():
             "foo {set}": {"bar {set}": 2},
         },
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -532,7 +532,7 @@ def test_error_render_wrong_template():
         "foo {var}": 100,
         "bar {render}": "{{ foo }",
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -543,7 +543,7 @@ def test_error_render_empty_template():
         "foo {var}": 100,
         "bar {render}": "{{}}",
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -554,7 +554,7 @@ def test_error_render_non_existing_filter():
         "foo {var}": 100,
         "bar {render}": "{{ foo|madeup }}",
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -565,7 +565,7 @@ def test_error_use_non_defined_variable():
         "foo {var}": 100,
         "bar {use}": "baz",
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
 
@@ -578,6 +578,6 @@ def test_error_delete_list_element_outside_bounds():
     patch = {
         "foo {delete@5}": None,
     }
-    with pytest.raises(PatchworkInputError) as err:
+    with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
