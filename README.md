@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="docs/cels-logo-small.png" alt="logo">
+    <img src="docs/cels-logo-header.png" alt="logo">
 </p>
 
 Cels
