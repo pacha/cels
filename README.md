@@ -9,7 +9,7 @@ cels
 ![Type checks](https://github.com/pacha/cels/actions/workflows/type-checks.yaml/badge.svg)
 ![Code formatting](https://github.com/pacha/cels/actions/workflows/code-formatting.yaml/badge.svg)
 
-Small command line tool to patch your YAML and JSON files
+_Small command line tool to patch your YAML and JSON files_
 
 ## Example
 
@@ -46,7 +46,7 @@ list:
 ## Features
 
 * It supports patching of YAML, JSON and TOML files.
-* Patches are regular YAML, JSON and TOML files with keys annotated in the form `{operation}`.
+* Patch files are just snippets of the original file with annotated keys (ie. `{operation}`).
 * It supports a wide number of operations (`set`, `delete`, `rename`, `insert`, `extend`, `use`, `link`, `render`).
 * It supports patching nested lists by providing indices to the operations (eg. `{delete@0,2}`).
 * It can also be used as a Python library to patch Python dictionaries.
@@ -57,6 +57,14 @@ To install cells, simply use `pip`:
 ```
 pip install cells
 ```
+
+## Why cels?
+
+TODO
+
+## Usage
+
+TODO
 
 Similar projects/specification documents
 ----------------------------------------
