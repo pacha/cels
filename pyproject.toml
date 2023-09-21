@@ -2,7 +2,7 @@
 name = "cels"
 version = "0.7.0"
 authors = [
-  { name="Andrés Sopeña Pérez", email="" },
+    {name="Andrés Sopeña Pérez", email="code@ehmm.org"},
 ]
 description = "Patch your YAML and JSON files."
 readme = "README.md"
@@ -25,6 +25,9 @@ dependencies = [
 [project.urls]
 "Homepage" = "https://github.com/pacha/cels"
 "Bug Tracker" = "https://github.com/pacha/cels/issues"
+
+[project.scripts]
+cels = "cels.cli:cels"
 
 [build-system]
 requires = ["hatchling"]
