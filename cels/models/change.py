@@ -4,8 +4,6 @@ from typing import Union
 from dataclasses import field
 from dataclasses import dataclass
 
-from dacite import from_dict
-from dacite import DaciteError
 from typeguard import check_type
 from typeguard import TypeCheckError
 
@@ -64,12 +62,13 @@ class Change:
             )
 
         # for some operations, it is fine to not to specify value
-        value_missing = "value" not in data
-        if value_missing:
+        try:
+            value = data["value"]
+        except KeyError:
             if operation.requires_value:
                 raise CelsInputError(f"Missing 'value' key in {show(data)}")
             else:
-                data["value"] = None
+                value = None
 
         # indices must me a list of integers
         indices = data.get("indices", [])
@@ -89,11 +88,11 @@ class Change:
             )
 
         # create change object
-        try:
-            data["operation"] = operation
-            obj = from_dict(cls, data)
-        except DaciteError as err:
-            raise CelsInputError(err)
+        obj = cls(
+            operation=operation,
+            value=value,
+            indices=indices,
+        )
         return obj
 
     def __str__(self):
