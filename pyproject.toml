@@ -1,6 +1,6 @@
 [project]
 name = "cels"
-version = "0.7.0"
+version = "0.1.0"
 authors = [
     {name="Andrés Sopeña Pérez", email="code@ehmm.org"},
 ]
