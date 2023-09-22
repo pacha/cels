@@ -9,7 +9,7 @@ cels
 ![Type checks](https://github.com/pacha/cels/actions/workflows/type-checks.yaml/badge.svg)
 ![Code formatting](https://github.com/pacha/cels/actions/workflows/code-formatting.yaml/badge.svg)
 
-_Small command line tool to patch your YAML and JSON files_
+_Command line tool to patch your YAML and JSON files_
 
 ## Example
 
@@ -43,13 +43,53 @@ list:
 - c
 ```
 
-## Features
+## Description
 
-* It supports patching of YAML, JSON and TOML files.
-* Patch files are just snippets of the original file with annotated keys (ie. `{operation}`).
-* It supports a wide number of operations (`set`, `delete`, `rename`, `insert`, `extend`, `use`, `link`, `render`).
-* It supports patching nested lists by providing indices to the operations (eg. `{delete@0,2}`).
-* It can also be used as a Python library to patch Python dictionaries.
+Cels is a command-line tool and Python library that enables you to make multiple
+modifications to YAML, JSON, or TOML documents. These modifications are based on
+changes specified in a _patch_ file. The patch file is written in the same
+format as the original data and mirrors its structure. For instance, if you want
+to change the `bar` key value from `hello` to `bye` in this example:
+```
+foo:
+  bar: hello
+```
+You simply need to create a patch like this:
+```
+foo:
+  bar: bye
+```
+For more complex modifications, you can annotate the keys of the patch
+document with the operation to perform in the format: `{operation[@index1,
+index2, …]}`. For example, to insert an element in the middle of a list, you
+only need to specify the new location and the value to insert:
+```yaml
+
+# input
+list:
+- a
+- c
+
+# patch
+list {insert@1}: b
+```
+Cels supports a variety of operations (`set`, `delete`, `rename`, `insert`,
+`extend`, `use`, `link`, `render`), and most of them can optionally take indices
+to work with any level of nested lists.
+
+You can also use Cels as a Python library and incorporate it into your
+application if you need to override configuration files (similar to
+`docker-compose` overrides).
+
+Refer to [Usage](#usage) for a comprehensive description of all available
+operations.
+
+See [Similar Projects](#similar-projects) for a comparison between Cels and
+other tools and specifications with similar objectives.
+
+> The name 'Cels' originates from the traditional, non-digital animation world,
+> where transparent layers with drawings (cels) were layered on top of each
+> other to create the final image.
 
 ## Installation
 
@@ -58,16 +98,11 @@ To install cells, simply use `pip`:
 pip install cells
 ```
 
-## Why cels?
-
-TODO
-
 ## Usage
 
 TODO
 
-Similar projects/specification documents
-----------------------------------------
+## Similar Projects
 
 * [RFC 6902](https://datatracker.ietf.org/doc/html/rfc6902): Proposed standard
   for JSON patch files. The patch files consists on list of changes. They don't
