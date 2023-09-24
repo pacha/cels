@@ -33,7 +33,7 @@ level {delete}: null
 ```
 
 ```
-$ cels input.yaml patch.yaml
+$ cels patch input.yaml patch.yaml
 foo:
   bar: 100
   baz: 2
@@ -72,14 +72,47 @@ list:
 
 # patch
 list {insert@1}: b
+
+# output
+list:
+- a
+- b
+- c
 ```
+
+Working with JSON files in Cels is quite similar to working with YAML files. To
+illustrate this, let's take a look at how the previous example would be
+transformed:
+
+Here's the input file:
+```json
+{
+  "list": ["a", "c"]
+}
+```
+And here's the patch file:
+```json
+{
+  "list {insert@1}": "b"
+}
+```
+After applying the patch, the result would be:
+```json
+{
+  "list": ["a", "b", "c"]
+}
+```
+
 Cels supports a variety of operations (`set`, `delete`, `rename`, `insert`,
 `extend`, `use`, `link`, `render`), and most of them can optionally take indices
 to work with any level of nested lists.
 
-You can also use Cels as a Python library and incorporate it into your
-application if you need to override configuration files (similar to
-`docker-compose` overrides).
+Cells can be beneficial when you possess a base configuration file or manifest
+for a system and need to tailor it to various environments (eg. 'development'
+and 'production'). Additionally, you can utilize Cells as a Python library and
+integrate it into your application. This allows your users to modify their own
+configuration in diverse setups (similar to `docker-compose` overrides, for
+example).
 
 Refer to [Usage](#usage) for a comprehensive description of all available
 operations.
@@ -87,9 +120,26 @@ operations.
 See [Similar Projects](#similar-projects) for a comparison between Cels and
 other tools and specifications with similar objectives.
 
-> The name 'Cels' originates from the traditional, non-digital animation world,
-> where transparent layers with drawings (cels) were layered on top of each
-> other to create the final image.
+> _What's the origin of the project name?_
+> The name 'Cels' is inspired by the conventional, analog world of animation. In
+> that context, 'cels' are transparent sheets featuring drawings that are layered
+> atop one another to create the final image. This is conceptually similar
+> (somehow) to how Cels operates with input and patch files.
+
+### Limitations
+
+When considering the use of Cels, it's important to note that there are two key
+limitations to its functionality:
+
+* Cels is only compatible with documents where the top-level element is
+  a dictionary or map. It does not work with documents where the top-level
+  element is a list.
+* Annotations can only be added to keys that are of the string type.
+  This isn't a problem with JSON documents, as all keys are inherently strings.
+  However, in YAML documents, keys aren't necessarily strings. While Cels can
+  handle YAML documents with non-string keys, and these keys can also appear in
+  patch files, they cannot be annotated. This means that advanced operations
+  cannot be applied to them.
 
 ## Installation
 
@@ -100,33 +150,857 @@ pip install cells
 
 ## Usage
 
-TODO
+> This section gives you a very complete overview on how to use the tool. Check [Reference](#reference)  if you prefer to get the list of
+operations and their meaning.
+
+### The 'patch' command
+
+Cels' main command is `patch`. It takes an input file (the file that you want to
+modify) and a patch file (the file that describes the changes to perform). Eg:
+```shell
+$ cels patch input.yaml patch.yaml
+```
+The result or running the command is sent to `stdout` by default. To save the
+result to a file, just redirect the output or use the `-O` option:
+```shell
+$ cels patch input.yaml patch.yaml > output.yaml
+$ cels patch input.yaml patch.yaml -O output.yaml
+```
+You can patch YAML, JSON and TOML files. Cels determines the correct format to
+use from the file extensions, but you can explicitly set the format for each one
+of the files with the `-i`, `-p`, and `-o` parameters (run `cels patch --help`
+for more information).
+
+> _Note_: It's possible to utilize various formats within the same command
+> execution. For instance, you can use a JSON patch and a YAML input file
+> simultaneously if you wish. Although there aren't many reasons to typically do
+> this, Cels doesn't place any limitations on the combination of formats used.
+
+### Basic operations
+
+To override values of the input document, you don't typically need to specify
+any operation in the patch file:
+```
+# input
+foo:
+    bar:
+        a: 1
+        b: 2
+        c: 3
+
+# patch
+foo:
+    bar:
+        b: 200
+
+# output
+foo:
+    bar:
+        a: 1
+        b: 200
+        c: 3
+```
+As shown in this example, dictionaries in the patch file get merged with
+the ones in the input file. However, if you want to override an entire
+dictionary, instead of merging it, you can use the operation `set`:
+```
+# input
+foo:
+    bar:
+        a: 1
+        b: 2
+        c: 3
+
+# patch
+foo:
+    bar {set}:
+        b: 200
+
+# output
+foo:
+    bar:
+        b: 200
+```
+Operations are specified by annotating the dictionary key with appending the
+text `{<operation>}` to it. Actually, the full annotation format is:
+```
+key {<operation>[@<index1>,<index2>,...]}
+```
+where the indices are provided to modify lists (see below [Working with
+lists](#working-with-lists) for more information on that.
+
+The `set` operation is the default one for all data types except for
+dictionaries, which means that most of the time you don't have to explicitly use
+it. For dictionaries, the default operation is `patch`, which merges the keys of
+the dictionary with the associated dictionary in the input file.
+
+#### 'delete' and 'rename'
+
+Other basic operations are `delete`, which deletes a key from the input file and
+`rename`, which changes the name of a key, but keeps its value:
+```
+# input
+foo:
+    bar: "A Fair Field Full of Folk"
+    baz:
+        one: 1
+        two: 2
+
+# patch
+foo:
+    bar {rename}: newbar
+    baz {delete}: null
+
+# output
+foo:
+    newbar "A Fair Field Full of Folk"
+```
+For the `delete` operation, you can pass any value (in this case `null`) as it
+is just ignored by Cels.
+
+## Working with Lists
+
+The majority of operations can utilize an index following an `@` symbol. This is
+to indicate that the action should be executed at a specific position within a
+list.
+
+For example, to change the second element of a list, you can use the `set`
+operation:
+
+```yaml
+# input
+foo:
+  - a
+  - b
+
+# patch
+foo {set@1}: B
+
+# output
+foo:
+  - a
+  - B
+```
+
+Note that when working with lists:
+
+* Indices start at 0 (meaning the first element is located at index 0).
+* Negative indices can be used. For instance, -1 refers to the last element in
+  the list, -2 to the penultimate one, and so on.
+* To specify elements within nested lists, you can provide multiple indices
+  separated by commas. For example, `1,1` refers to `b` in a nested list like
+  `[[a, b], [c, d]]`.
+
+### 'insert' and 'extend'
+
+When working with lists, the operations `insert` and `extend` prove to be
+extremely useful.
+
+In the case of `insert` an element is added to the list:
+```yaml
+# input
+foo:
+  - a
+  - b
+
+# patch
+foo {insert}: c
+
+# output
+foo:
+  - a
+  - b
+  - c
+```
+Whereas, in the case of `extend` all the elements of a list are added:
+```yaml
+# input
+foo:
+  - a
+  - b
+
+# patch
+foo {extend}:
+  - c
+  - d
+
+# output
+foo:
+  - a
+  - b
+  - c
+  - d
+```
+In both cases, you can use indices to specify at which position you want to add
+the elements:
+
+* `{insert@NUM}` and `{extend@NUM}` add the elements _before_ position `NUM`.
+  That is, to add them at the beginning of the list use `{insert@0}` and
+  `{extend@0}`.
+* The special index `_` can be used to indicate that the elements should be
+  _appended_ at the end of the list (i.e. `{insert@_}`). You can omit the `_` to
+  operate on the top level list. That is, `{insert}` and `{extend}` are
+  equivalent to `{insert@_}` and `{extend@_}`. However, if you need to append
+  elements to the end of a nested list, then it is necessary to use it (as
+  otherwise the set of indices would be ambiguous).
+
+In both scenarios, indices can be used to designate the position where you wish
+to add elements:
+
+* `{insert@NUM}` and `{extend@NUM}` place the elements _before_ the `NUM`
+  position. In other words, to insert them at the start of the list, use
+  `{insert@0}` and `{extend@0}`.
+* The unique index `_` can be utilized to signify that the elements should be
+  _appended_ to the list's end (i.e., `{insert@_}`). The `_` can be omitted when
+  operating on the top-level list, meaning `{insert}` and `{extend}` are
+  synonymous with `{insert@_}` and `{extend@_}`. However, if you need to append
+  elements to a nested list's end, it's crucial to use it to avoid ambiguity in
+  the position referred by the indices.
+
+For example, here's how you append an element to the end of a nested list:
+
+```yaml
+# input
+foo:
+  - a
+  - b
+
+# patch
+foo {insert}: c
+
+# output
+foo:
+  - a
+  - b
+  - c
+```
+
+### Using variables
+
+It is possible to define variables of any type and then reuse that value, which
+can be of any type, at different places of the patch file.
+
+This is a quick example:
+```
+# input
+foo: 1
+
+# patch
+my_var {var}: World
+foo {use}: my_var
+bar {render}: "Hello {{ my_var }}!"
+
+# output
+foo: World
+bar: "Hello Wold!"
+```
+
+As you can see, variables are defined with:
+```
+key {var}: value
+```
+where `key` is the name of the variable and `value` its value.
+
+Variable definitions, while not visible in the output document, can be utilized
+through the `use` and `render` operations to insert values in various locations:
+
+* The `use` operation simply inserts the variable as is. If the variable is a
+  list or a dictionary, `use` will incorporate it without any modifications.
+* The `render` operation allows you to define a
+  [Jinja](https://jinja.palletsprojects.com/en/3.1.x/templates/) template string
+  that can reference one or more variables available at that point. If the
+  variable is a list or a dictionary, you can use the `.` or `[]` notation to
+  pinpoint the exact value you wish to use. Additionally, you can utilize any of
+  the features offered by the Jinja template language, such as filters or
+  conditional structures.
+
+The following is a more elaborated example of using variables with the `render`
+operation:
+```
+# patch
+my_var {var}:
+  one: a
+  two:
+    - b
+    - c
+foo {render}: "{{ my_var.one }} lowercase, {{ my_var.two[0]|upper }} uppercase"
+
+# output
+foo: a lowercase, B uppercase
+```
+
+#### Variable scope
+
+Please note that a variable comes with an associated scope:
+
+* The `use` and `render` commands can only reference variables from the same
+  dictionary in which they are used, or from any parent or ancestor dictionary.
+  In other words, if you want a variable to be accessible throughout the entire
+  document, you should define it in the root dictionary of the document.
+* If a variable is redefined in a child dictionary, the value in the child
+  dictionary will take precedence over the one in the parent dictionary.
+
+### Multiple changes for a same key
+
+If you want to perform multiple changes to the same key, you can use the
+`change` operation, that takes a list of the modifications to perform:
+```
+# input
+foo: 1
+
+# patch
+foo {change}:
+  - operation: set
+    value: 100
+  - operation: rename
+    value: bar
+
+# output
+bar: 100
+```
+The operations will be executed in the order they are presented. Each item in
+the operations list should contain no more than three fields:
+
+* `operation`: This refers to one of the possible operations (`set`, `delete`,
+  `rename`, `insert`, etc.).
+* `value`: The value depends on the type of operation. It may be omitted for
+  keys that do not require a value, such as `rename`.
+* `indices`: This is a list of integers (and `_` for `insert` and `extend`
+  operations) used to manipulate nested lists. This field can be omitted for
+  operations that do not intend to modify lists.
+
+In summary, these three fields correspond to those that can be defined in a
+standard annotation: `key {operation@indices}: value`.
+
+### Repeating content from the input document
+
+The `link` operation allows you to reference parts of the input document and
+reuse them in other parts. For instance, here we use the `link` operation to
+remove the `bar` level from the input document:
+```
+# input
+foo:
+  bar:
+    one: 1
+    two: 2
+
+# patch
+foo {delete}: null
+new-foo {link}: .foo.bar
+
+# result
+new-foo:
+  one: 1
+  two: 2
+```
+The 'link' operation always takes a path that employs the '.' and '[]' notation
+to traverse through the dictionaries and lists within the input document. The
+initial '.' symbol signifies the root dictionary of the document.
+
+### Patching dictionaries that are nested in lists
+
+If you need to modify a dictionary within a list, you can utilize the `patch`
+operation. In most scenarios, explicitly using `patch` isn't required, as
+dictionaries in the patch file are automatically merged with those in the input
+document. However, when dealing with dictionaries within lists, it becomes
+essential to use `patch` because you need to specify the index that indicates
+the dictionary's position within the list. Here's an example:
+
+```
+# input
+foo:
+- a: 1
+  b: 2
+
+# patch
+foo {patch@0}:
+  a: 100
+
+# result
+foo:
+- a: 100
+  b: 2
+```
+
+## Getting help
+
+To list all available operations, you can use:
+```
+cels list operations
+```
+
+To show help for a given operation, including its description and usage
+examples, you can use:
+```
+cels describe operation OPERATION_NAME
+```
+
+## Changing the annotation format
+
+By default, annotations in Cels appear as `<space>{operation@indices}`. However,
+you can customize all the symbols used to better suit your needs by using the
+command parameters.
+
+For example, the command below:
+```
+cels patch input.yaml patch.yaml \
+    --separator "_" \
+    --left-marker "(" \
+    --index-marker "%" \
+    --right-marker ")"
+```
+will enable you to write the annotations in the patch file in the following
+format: `_(operation%indices)`.
+
+## Reference
+
+> _Note_: You can access the reference information directly from the tool. Run
+> `cels list operations` to view the available operations. Additionally, you can
+> use `cels describe operation <name>` to display comprehensive information
+> about a specific operation, including examples.
+
+### set
+
+`key {set[@index1,index2,…]}: value`
+
+Set the value of `key` to `value`.
+
+Typically, you don't have to explicitly use this operation unless you're
+replacing the element of a list at a given position, or `value` is a dictionary
+that you want to set _as-is_ without merging it with the contents of the input
+document.
+
+### delete
+
+`key {delete[@index1,index2,…]}: value`
+
+Delete `key`.
+
+Removes the given key from the input dictionary. `value` is ignored. You can use
+`null` for YAML and JSON and empty string (`""`) for TOML.
+
+### rename
+
+`key {rename}: new-name`
+
+Rename `key` to `new-name`. The actual value of the key is not modified. `rename`
+doesn't take indices.
+
+### insert
+
+`key {insert[@index1,index2,…,_]}: value`
+
+Insert `value` in a list.
+
+`{insert@index}` allows you to insert a `value` at a specific `index` position
+within the list pointed to by `key`. `index` can be either a positive or negative
+integer. If `index` is `0`, the element is inserted at the start of the
+list. Negative indices count from the end of the list, with `-1` representing
+the last element, `-2` the second to last, and so forth. 
+
+You can also use `_` as an index (i.e., `{insert@_}`), which appends the element
+to the end of the list. `{insert@_}` and `{insert}` are equivalent.
+
+To insert an element into a nested list, you can provide multiple indices
+separated by commas. The first index refers to the position of the nested list
+within the parent list. The second index indicates the position within the
+nested list where the `value` should be inserted. This second index can also be
+`_`, which will append the element to the end of the nested list. You can
+provide any number of indices to accommodate additional levels of nesting.
+
+### extend
+
+`key {extend[@index1,index2,…,_]}: value`
+
+Extend a list with all the elements inside `value` (which must be a list).
+
+`extend` operates similarly to `insert`. However, instead of inserting a single
+element, it inserts all elements from `value`, which must be a list. Indices
+in `extend` function in the same way as they do in `insert`.
+
+### var
+
+`key {var}: value`
+
+Define a variable inside the patch document.
+
+The `var` operation establishes a variable in the form of `key = value`, which
+can subsequently be referenced by the `use` and `render` operations. The act of
+defining a variable does not alter the output document. Changes to the document
+only occur through the application of the `use` and `render` operations. The
+`var` operation doesn't take indices.
+
+Variables possess a defined scope and can only be referenced within the same
+dictionary where they were initially defined, or from any of its
+subsequent child dictionaries. Consequently, if your aim is to define a
+variable that can be accessed from any location within the patch file, it's
+best to define it within the root dictionary of the patch file.
+
+### use
+
+`key {use[@index1,index2,…]}: variable-name`
+
+Set `key` to the value defined by a variable.
+
+The `use` operation works similarly to `set`. However, instead of directly
+supplying a value, this operation references a variable (identified by
+`variable-name`) to source the value to use.
+
+Given that variables possess a scope, the `use` operation can only reference
+those that are defined within the same dictionary where `use` is being invoked,
+or within one of its ancestor dictionaries.
+
+### render
+
+`key {render[@index1,index2,…]}: template`
+
+Render a template string using variables defined with `var`.
+
+The `render` operation functions in a manner akin to `set`. However, instead of
+providing a value directly, this operation utilizes a
+[Jinja](https://jinja.palletsprojects.com/en/3.1.x/templates/) template string
+that can reference any variables defined via `var`. For example, if a variable
+is defined as `foo {var}: bar`, a template string can incorporate it like so:
+`"This is the value of the variable: {{ foo }}"`. In scenarios where variables
+are lists or dictionaries, you can employ the `.` and `[]` notation to
+reference values within these structures. For instance, `foo {var}: ["a", "b",
+"c"]` can be referred to as `"{{ foo[0] }}"`. The template string can make use
+of any of the Jinja features such as filters or control structures like
+conditionals or loops. Also, it can reference multiple variables in the
+template string provided that they are in scope (either defined in the same
+dictionary where `render` is being invoked, or within one of its ancestor
+dictionaries.
+
+### link
+
+`key {link[@index1,index2,…]}: path`
+
+Attach part of the input document as the value for `key`.
+
+`path` must correspond to a valid location within the input document (for
+instance, `.key1.key2[0].key3`). The value identified by this path is then
+utilized as the value for the `key` in the modified document. This operation
+proves beneficial when there's a need to replicate a section of the input
+document in various locations within the output document. The `path` should
+always represent a location in the input document, not the patch document. If
+you need to reuse a specific structure within the patch document, refer to the
+`var` and `use` operations.
+
+### patch
+
+`key {patch[@index1,index2,…]}: value`
+
+Combine the `value` dictionary with the dictionary found under `key` in the
+input document.
+
+The `patch` operation is the default one for dictionaries in the patch
+file. If an operation isn't explicitly defined for a key that has a dictionary
+value, this dictionary will be merged with the corresponding one in the
+input document. So, most of the time, there's no need to specifically call out
+the `patch` operation. However, there are certain situations where its use
+becomes necessary. For example, if your goal is to patch a dictionary that's
+nested within a list, you'll need to bring `patch` into play, along with
+the index that pinpoints the dictionary's location within the list. Here's a
+quick illustration:
+
+```
+# input
+foo:
+- a: 3
+  b: 100
+- a: 5
+  b: 700
+
+# patch
+foo {patch@0}:
+  b: null
+
+# result
+foo:
+- a: 3
+  b: null
+- a: 5
+  b: 700
+```
+
+### change
+
+```
+key {change[@index1,index2,…]}:
+  - operation: …
+    value: …
+    indices: …
+  - … 
+```
+
+Execute multiple operations for a given key.
+
+In most cases, annotations in Cels, like `key {operation@index}`, carry out
+just a single action on a key. However, there might be situations where you'd
+like to make several changes to the same key. This is where the `change`
+operation comes into play. It accepts a list of operations, along with their
+respective values and indices, and executes them in the order they're listed.
+For instance, if you want to rename a key and also assign it a new value, you
+can do so as follows:
+```
+# input
+foo: 1
+
+# patch
+foo {change}:
+  - operation: set
+    value: 100
+  - operation: rename
+    value: bar
+
+# output
+bar: 100
+```
+You also have the option to define indices for the operations. Their function
+will remain consistent with their use in regular annotations.
+
+> _Note_: the notation:
+> 
+> ```
+> foo {change}:
+>   - operation: set
+>     value: 100
+>   - operation: rename
+>     value: bar
+> ```
+> 
+> is different from listing the operations one after another:
+> 
+> ```
+> foo {set}: 100
+> foo {rename}: bar
+> ```
+> 
+> In the latter scenario, the second operation would supersede the initial one.
+> Therefore, there are minimal instances, if any, where you might want to do
+> that.
+
+### keep
+
+`key {keep[@index1,index2,…]}: value`
+
+Don't change the original value of the input file in any way.
+
+This refers to the `no-op` operation in Cels. While it's possible to use, it's
+typically unnecessary because any key from the input file that doesn't appear in
+the patch file will remain unaffected. However, it's worth noting that this
+operation is used internally within the tool and will be listed in the logs when
+they are activated.
+
+## Using Cels as a Python library
+
+You can use Cels programmatically from your Python code. It supplies two basic
+functions: `patch_document` and `patch_dictionary`.
+
+### patch_document
+
+`patch_document` allows you to pass JSON, YAML or TOML text for the input and
+patch documents, in the same way that they are passed to the `cels` command:
+```
+from cels import patch_document
+
+output = patch_document(input_format, input_text, patch_format, patch_text, output_format)
+```
+
+`input_format` and `patch_format` are string arguments and
+can take any of the following values: `json`, `yaml` or `toml`.
+
+`input_text` and `patch_text` are the raw texts to be used (of course, their
+format should match with the parameters above).
+
+Finally, it is possible to specify the format of the output text with
+`output_format`, which doesn't necessarily have to match the input formats.
+
+### patch_dictionary
+
+`patch_dictionary` works exactly the same as `patch_document` but the data is
+passed already in the format of python dictionaries:
+```
+from cels import patch_dictionary
+
+result = patch_dictionary(input_dict, patch_dict)
+```
+
+In both cases (`patch_document` and `patch_dictionary`), you can pass
+`separator`, `left_marker`, `index_marker` and `right_marker` parameters to
+define the format of the key annotations (see [Changing the annotation
+format](#changing-the-annotation-format) for more information).
 
 ## Similar Projects
 
-* [RFC 6902](https://datatracker.ietf.org/doc/html/rfc6902): Proposed standard
-  for JSON patch files. The patch files consists on list of changes. They don't
-  mimic the original JSON file structure but offer a wide variety of operations.
-* [RFC 7396](https://datatracker.ietf.org/doc/html/rfc7396): Proposed standard
-  for JSON path files. Unlike RFC 6902, the patches in this case mimic the
-  structure of the original JSON file. There are some limitations though: the
-  original document can't make use of explicit `null` values and there are no
-  operations to handle values in lists.
-* [ytt](https://carvel.dev/ytt/): Very complete command line tool to patch YAML
-  files. A bit complex.
+### jq and yq
+
+[jq](https://jqlang.github.io/jq/) and [yq](https://mikefarah.gitbook.io/yq/)
+are widely used command-line tools for processing JSON and YAML. The key
+distinction between these tools and Cels lies in their operational approach.
+`jq` and `yq` operate using paths, whereas Cels utilizes patch files.
+
+For example, if you want to alter the value of a key in `yq`, you would specify
+it as follows:
+```
+.foo.bar.baz = "value"
+```
+In contrast, with Cels, you would write the actual YAML:
+```
+foo:
+  bar:
+    baz: "value"
+```
+`jq` and `yq` shine when it comes to making specific modifications to a
+document. They allow you to pinpoint and alter a deeply nested key with a
+single command line. However, their intuitiveness diminishes when multiple
+changes are required within a document. In such scenarios, using a patch file
+as in Cels may provide a better overall view of the modifications and their
+interrelations.
+
+In this discussion, we're primarily focusing on the patching capabilities of
+these tools. However, they also offer additional features (like formatting and
+data extraction) that Cels does not.
+For more details, please refer to their respective documentation.
+
+It's worth noting that `jq` is exclusively for JSON, while `yq` can handle both
+JSON and YAML.
+
+### Jsonnet, CUE, YTT
+
+[Jsonnet](https://jsonnet.org/), [CUE](https://cuelang.org/), and
+[YTT](https://carvel.dev/ytt/) are fully-fledged languages equipped with import
+mechanisms, loops, conditionals, functions, and other programming language
+constructs. They are designed as supersets of JSON, as seen in Jsonnet and CUE,
+and a superset of YAML in the case of YTT (however, in this case, language
+constructs are embedded within comments, ensuring compatibility as a YAML
+document). These languages can be an excellent choice if you're tasked with
+making complex modifications to JSON or YAML files.
+
+Cels stands out from these solutions due to its simplicity. All you need to do
+is annotate each key you wish to modify with the desired operation. While it
+may not have the capabilities of Jsonnet, CUE, YTT, or any other configuration
+programming language, it still covers a wide range of common use cases while
+still being extremely simple to use.
+
+### Starlark and Dhall
+
+[Starlark](https://github.com/bazelbuild/starlark) and
+[Dhall](https://dhall-lang.org) share similarities with Jsonnet, CUE, and YTT
+as they are all fully-fledged configuration programming languages. However,
+they don't extend JSON or YAML. Starlark is a subset of Python, while Dhall has
+its own unique syntax (though it does allow exporting to any other format).
+
+As in the case of, Jsonnet, CUE, and YTT, Cels sets itself apart from Starlark
+and Dhall by being _not_ a comprehensive language, but rather a simple
+collection of annotations. This makes it considerably less complex in
+comparison.
+
+### RFC 6902 and RFC 7396
+
+[RFC 6902](https://datatracker.ietf.org/doc/html/rfc6902) and [RFC
+7396](https://datatracker.ietf.org/doc/html/rfc7396) are both proposed
+standards for patching JSON files.
+
+`RFC 6902` defines a JSON structure for defining a list of operations to
+be applied sequentially to the original document in order to patch it.
+
+This is an example:
+```
+[
+  { "op": "remove", "path": "/a/b/c" },
+  { "op": "add", "path": "/a/b/c", "value": [ "foo", "bar" ] },
+  { "op": "replace", "path": "/a/b/c", "value": 42 },
+]
+```
+
+`RFC 6902` provides a broad spectrum of operations. However, it doesn't
+replicate the original document, but merely outlines the operations in a list
+format. On the other hand, the patch file in Cels can result in a more compact
+document that is easier to read and potentially easier to maintain. Moreover,
+Cels isn't limited to JSON support; it also accommodates YAML and TOML.
+
+On the other hand, `RFC 7396` is very similar to Cels. Like Cels, it defines a
+patch format that mirrors the original document.
+
+For example, given the following example file:
+```
+{
+  "a": "b",
+  "c": {
+    "d": "e",
+    "f": "g"
+  }
+}
+```
+
+A RFC 7396 patch may look like this:
+```
+{
+  "a":"z",
+  "c": {
+    "f": null
+  }
+}
+```
+Which results in:
+```
+{
+  "a": "z",
+  "c": {
+    "d": "e",
+  }
+}
+```
+(Setting a key to `null` deletes it).
+
+For comparison, the equivalent Cels patch would look like:
+```
+{
+  "a":"z",
+  "c": {
+    "f {remove}": null
+  }
+}
+```
+
+As shown in the examples, `RFC 7396` and Cels are very similar conceptually,
+however:
+
+* `RFC 7396` only supports leaving a key untouched, overriding it or deleting
+  it. Cels, on the other hand, offers a wider range of options.
+* Cels can operate on the elements of lists, while that's not possible in `RFC 7396`.
+* `RFC 7396` only supports JSON, while Cels can work with YAML and TOML too.
+* `RFC 7396` uses `null` to delete keys from the original dictionary. However,
+  `null` is a completely valid value in a JSON file, which makes `RFC 7396`
+  unable of representing certain valid JSON documents (in particular, it is not
+  possible to set a key to `null` as it would be deleted instead).
+
+These examples illustrate that `RFC 7396` and Cels share many similarities, but
+there are key differences:
+
+* `RFC 7396` is limited to leaving a key as is, overwriting it, or deleting it.
+  In contrast, Cels provides a broader set of options.
+* Cels has the capability to manipulate list elements, a feature that `RFC 7396`
+  lacks.
+* `RFC 7396` employs `null` to remove keys from the original dictionary.
+  However, `null` is a perfectly valid value in a JSON file, which renders
+  `RFC 7396` incapable of representing certain valid JSON documents.
+  Specifically, it's impossible to assign a `null` value to a key as it
+  would be deleted instead.
+* While `RFC 7396` only supports JSON, Cels can handle YAML and TOML as well.
+
+The following is a (non-comprehensive) list of `RFC 6902` and `RFC7396` implementations:
+
 * [json-patch](https://github.com/evanphx/json-patch): Go implementation of RFC 6902 and
   RFC 7396.
 * [python-json-patch](https://github.com/stefankoegl/python-json-patch): Python
   implementation of RFC 6902.
-* [yaml-patcher](https://github.com/Canop/yaml-patcher): Command line tool to
-  patch YAML files. It only supports one operation at the moment (overriding
-  values in the original YAML).
-* [yaml-patch](https://github.com/campos-ddc/yaml-patch): Command line tool to
-  patch YAML documents passing a list of changes to apply. The patches are not
-  YAML documents themselves but a list of paths and values to override/append. It
-  can be used as a Python library.
 * [yaml-diff-patch](https://github.com/grantila/yaml-diff-patch): Command line
   and npm package that allows to apply RFC 6902 JSON patches to a YAML document.
 * [chbrown/rfc6902](https://github.com/chbrown/rfc6902): TypeScript
   implementation of RFC 6902.
 
+## License
+
+Cels is available under the MIT license.
