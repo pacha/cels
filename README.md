@@ -32,7 +32,7 @@ list {insert}: c
 level {delete}: null
 ```
 
-![Cels debug information](docs/screenshot-verbose-output.png)
+![Cels screenshot](docs/screenshot-verbose-output.png)
 
 ## Description
 
@@ -463,6 +463,27 @@ the operations list should contain no more than three fields:
 In summary, these three fields correspond to those that can be defined in a
 standard annotation: `key {operation@indices}: value`.
 
+> _Note_: the notation:
+> 
+> ```
+> foo {change}:
+>   - operation: set
+>     value: 100
+>   - operation: rename
+>     value: bar
+> ```
+> 
+> is different from listing the operations one after another:
+> 
+> ```
+> foo {set}: 100
+> foo {rename}: bar
+> ```
+> 
+> In the latter scenario, the second operation would supersede the initial one.
+> Therefore, there are minimal instances, if any, where you might want to do
+> that.
+
 ### Repeating content from the input document
 
 The `link` operation allows you to reference parts of the input document and
@@ -513,25 +534,6 @@ foo:
   b: 2
 ```
 
-## Getting help
-
-To list all available operations, you can use:
-```
-cels list operations
-```
-
-To show help for a given operation, including its description and usage
-examples, you can use:
-```
-cels describe operation OPERATION_NAME
-```
-
-Additionally, by utilizing the `-v` flag, you can activate the verbose output.
-This will display the operation that was used to generate each node in the
-output document:
-
-![Cels debug information](docs/screenshot-verbose-output.png)
-
 ## Changing the annotation format
 
 By default, annotations in Cels appear as `<space>{operation@indices}`. However,
@@ -549,248 +551,26 @@ cels patch input.yaml patch.yaml \
 will enable you to write the annotations in the patch file in the following
 format: `_(operation%indices)`.
 
-## Reference
+## Getting help
 
-> _Note_: You can access the reference information directly from the tool. Run
-> `cels list operations` to view the available operations. Additionally, you can
-> use `cels describe operation <name>` to display comprehensive information
-> about a specific operation, including examples.
-
-### set
-
-`key {set[@index1,index2,…]}: value`
-
-Set the value of `key` to `value`.
-
-The `set` operation is the default one for all patch value data types,
-except for dictionaries. Typically, you don't have to explicitly use this
-operation unless you're replacing the element of a list, or `value` is a
-dictionary that you want to set as-is without merging it with the
-contents of the input document.
-
-### delete
-
-`key {delete[@index1,index2,…]}: value`
-
-Delete `key`.
-
-Removes the given key from the input dictionary. `value` is ignored. You can use
-`null` for YAML and JSON and empty string (`""`) for TOML.
-
-### rename
-
-`key {rename}: new-name`
-
-Rename `key`.
-
-Rename `key` to `new-name`. The actual value of the key is not modified. `rename`
-doesn't take indices.
-
-### insert
-
-`key {insert[@index1,index2,…,_]}: value`
-
-Insert `value` in a list.
-
-`{insert@index}` allows you to insert a `value` at a specific `index` position
-within the list pointed to by `key`. `index` can be either a positive or negative
-integer. If `index` is `0`, the element is inserted at the start of the
-list. Negative indices count from the end of the list, with `-1` representing
-the last element, `-2` the second to last, and so forth. 
-
-You can also use `_` as an index (i.e., `{insert@_}`), which appends the element
-to the end of the list. `{insert@_}` and `{insert}` are equivalent.
-
-To insert an element into a nested list, you can provide multiple indices
-separated by commas. The first index refers to the position of the nested list
-within the parent list. The second index indicates the position within the
-nested list where the `value` should be inserted. This second index can also be
-`_`, which will append the element to the end of the nested list. You can
-provide any number of indices to accommodate additional levels of nesting.
-
-### extend
-
-`key {extend[@index1,index2,…,_]}: value`
-
-Extend a list with all the elements inside `value` (which must be a list).
-
-`extend` operates similarly to `insert`. However, instead of inserting a single
-element, it inserts all elements from `value`, which must be a list. Indices
-in `extend` function in the same way as they do in `insert`.
-
-### var
-
-`key {var}: value`
-
-Define a variable inside the patch document.
-
-The `var` operation establishes a variable in the form of `key = value`, which
-can subsequently be referenced by the `use` and `render` operations. The act of
-defining a variable does not alter the output document. Changes to the document
-only occur through the application of the `use` and `render` operations. The
-`var` operation doesn't take indices.
-
-Variables possess a defined scope and can only be referenced within the same
-dictionary where they were initially defined, or from any of its
-subsequent child dictionaries. Consequently, if your aim is to define a
-variable that can be accessed from any location within the patch file, it's
-best to define it within the root dictionary of the patch file.
-
-### use
-
-`key {use[@index1,index2,…]}: variable-name`
-
-Set `key` to the value defined by a variable.
-
-The `use` operation works similarly to `set`. However, instead of directly
-supplying a value, this operation references a variable (identified by
-`variable-name`) to source the value to use.
-
-Given that variables possess a scope, the `use` operation can only reference
-those that are defined within the same dictionary where `use` is being invoked,
-or within one of its ancestor dictionaries.
-
-### render
-
-`key {render[@index1,index2,…]}: template`
-
-Render a template string using variables defined with `var`.
-
-The `render` operation functions in a manner akin to `set`. However, instead of
-providing a value directly, this operation utilizes a
-[Jinja](https://jinja.palletsprojects.com/en/3.1.x/templates/) template string
-that can reference any variables defined via `var`. For example, if a variable
-is defined as `foo {var}: bar`, a template string can incorporate it like so:
-`"This is the value of the variable: {{ foo }}"`. In scenarios where variables
-are lists or dictionaries, you can employ the `.` and `[]` notation to
-reference values within these structures. For instance, `foo {var}: ["a", "b",
-"c"]` can be referred to as `"{{ foo[0] }}"`. The template string can make use
-of any of the Jinja features such as filters or control structures like
-conditionals or loops. Also, it can reference multiple variables in the
-template string provided that they are in scope (either defined in the same
-dictionary where `render` is being invoked, or within one of its ancestor
-dictionaries.
-
-### link
-
-`key {link[@index1,index2,…]}: path`
-
-Attach part of the input document as the value for `key`.
-
-`path` must correspond to a valid location within the input document (for
-instance, `.key1.key2[0].key3`). The value identified by this path is then
-utilized as the value for the `key` in the modified document. This operation
-proves beneficial when there's a need to replicate a section of the input
-document in various locations within the output document. The `path` should
-always represent a location in the input document, not the patch document. If
-you need to reuse a specific structure within the patch document, refer to the
-`var` and `use` operations.
-
-### patch
-
-`key {patch[@index1,index2,…]}: value`
-
-Combine the `value` dictionary with the dictionary found under `key` in the
-input document.
-
-The `patch` operation is the default one for dictionaries in the patch
-file. If an operation isn't explicitly defined for a key that has a dictionary
-value, this dictionary will be merged with the corresponding one in the
-input document. So, most of the time, there's no need to specifically call out
-the `patch` operation. However, there are certain situations where its use
-becomes necessary. For example, if your goal is to patch a dictionary that's
-nested within a list, you'll need to bring `patch` into play, along with
-the index that pinpoints the dictionary's location within the list. Here's a
-quick illustration:
-
+To list all available operations, you can use:
 ```
-# input
-foo:
-- a: 3
-  b: 100
-- a: 5
-  b: 700
-
-# patch
-foo {patch@0}:
-  b: null
-
-# result
-foo:
-- a: 3
-  b: null
-- a: 5
-  b: 700
+cels list operations
 ```
 
-### change
-
+To show help for a given operation, including its description and usage
+examples, you can use:
 ```
-key {change[@index1,index2,…]}:
-  - operation: …
-    value: …
-    indices: …
-  - … 
+cels describe operation OPERATION_NAME
 ```
 
-Execute multiple operations for a given key.
+![Cels operation information](docs/screenshot-extend-operation.png)
 
-In most cases, annotations in Cels, like `key {operation@index}`, carry out
-just a single action on a key. However, there might be situations where you'd
-like to make several changes to the same key. This is where the `change`
-operation comes into play. It accepts a list of operations, along with their
-respective values and indices, and executes them in the order they're listed.
-For instance, if you want to rename a key and also assign it a new value, you
-can do so as follows:
-```
-# input
-foo: 1
+Additionally, by utilizing the `-v` flag, you can activate the verbose output.
+This will display the operation that was used to generate each node in the
+output document:
 
-# patch
-foo {change}:
-  - operation: set
-    value: 100
-  - operation: rename
-    value: bar
-
-# output
-bar: 100
-```
-You also have the option to define indices for the operations. Their function
-will remain consistent with their use in regular annotations.
-
-> _Note_: the notation:
-> 
-> ```
-> foo {change}:
->   - operation: set
->     value: 100
->   - operation: rename
->     value: bar
-> ```
-> 
-> is different from listing the operations one after another:
-> 
-> ```
-> foo {set}: 100
-> foo {rename}: bar
-> ```
-> 
-> In the latter scenario, the second operation would supersede the initial one.
-> Therefore, there are minimal instances, if any, where you might want to do
-> that.
-
-### keep
-
-`key {keep[@index1,index2,…]}: value`
-
-Don't change the original value of the input file in any way.
-
-This refers to the `no-op` operation in Cels. While it's possible to use, it's
-typically unnecessary because any key from the input file that doesn't appear in
-the patch file will remain unaffected. However, it's worth noting that this
-operation is used internally within the tool and will be listed in the logs when
-they are activated.
+![Cels debug information](docs/screenshot-verbose-output.png)
 
 ## Using Cels as a Python library
 
