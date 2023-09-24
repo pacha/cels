@@ -32,7 +32,16 @@ list {insert}: c
 level {delete}: null
 ```
 
-![Cels screenshot](docs/screenshot-verbose-output.png)
+```
+$ cels patch input.yaml patch.yaml
+foo:
+  bar: 100
+  baz: 2
+list:
+- a
+- b
+- c
+```
 
 ## Description
 
