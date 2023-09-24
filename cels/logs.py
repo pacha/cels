@@ -7,6 +7,6 @@ logging.basicConfig(
     level="NOTSET",
     format=log_format,
     datefmt="",
-    handlers=[RichHandler(show_time=False)],
+    handlers=[RichHandler(show_time=False, show_path=False)],
 )
 log = logging.getLogger("cels")

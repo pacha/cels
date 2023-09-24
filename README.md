@@ -32,16 +32,7 @@ list {insert}: c
 level {delete}: null
 ```
 
-```
-$ cels patch input.yaml patch.yaml
-foo:
-  bar: 100
-  baz: 2
-list:
-- a
-- b
-- c
-```
+![Cels debug information](docs/screenshot-verbose-output.png)
 
 ## Description
 
@@ -535,6 +526,12 @@ examples, you can use:
 cels describe operation OPERATION_NAME
 ```
 
+Additionally, by utilizing the `-v` flag, you can activate the verbose output.
+This will display the operation that was used to generate each node in the
+output document:
+
+![Cels debug information](docs/screenshot-verbose-output.png)
+
 ## Changing the annotation format
 
 By default, annotations in Cels appear as `<space>{operation@indices}`. However,
@@ -565,10 +562,11 @@ format: `_(operation%indices)`.
 
 Set the value of `key` to `value`.
 
-Typically, you don't have to explicitly use this operation unless you're
-replacing the element of a list at a given position, or `value` is a dictionary
-that you want to set _as-is_ without merging it with the contents of the input
-document.
+The `set` operation is the default one for all patch value data types,
+except for dictionaries. Typically, you don't have to explicitly use this
+operation unless you're replacing the element of a list, or `value` is a
+dictionary that you want to set as-is without merging it with the
+contents of the input document.
 
 ### delete
 
@@ -582,6 +580,8 @@ Removes the given key from the input dictionary. `value` is ignored. You can use
 ### rename
 
 `key {rename}: new-name`
+
+Rename `key`.
 
 Rename `key` to `new-name`. The actual value of the key is not modified. `rename`
 doesn't take indices.

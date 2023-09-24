@@ -27,6 +27,7 @@ class Operation:
 
     # instance attributes
     name: str
+    format: str
     description: str
     notes: str
     examples: List[Dict[str, str]]
@@ -39,6 +40,7 @@ class Operation:
     def add(
         cls,
         name: str,
+        format: str,
         description: str,
         notes: str,
         examples: list,
@@ -53,6 +55,7 @@ class Operation:
             )
         instance = cls(
             name,
+            format,
             description,
             notes,
             examples,

@@ -55,7 +55,7 @@ class Path:
             left_separator, right_separator = ".", ""
 
         # get escape characters
-        part_str = str(part) if part is not None else "<null>"
+        part_str = str(part) if part is not None else "_"
         if special_chars_pattern.search(part_str):
             left_escape, right_escape = '"', '"'
         else:
