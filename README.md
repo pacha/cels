@@ -59,6 +59,13 @@ You simply need to create a patch like this:
 foo:
   bar: bye
 ```
+
+To run the tool and get the result, you just pass both files as arguments to
+the `cels patch` command:
+```
+cels patch input.yaml output.yaml
+```
+
 For more complex modifications, you can annotate the keys of the patch
 document with the operation to perform in the format: `{operation[@index1,
 index2, …]}`. For example, to insert an element in the middle of a list, you
@@ -120,25 +127,25 @@ operations.
 See [Similar Projects](#similar-projects) for a comparison between Cels and
 other tools and specifications with similar objectives.
 
-> _What's the origin of the project name?_
+> _The project name_
+>
 > The name 'Cels' is inspired by the conventional, analog world of animation. In
 > that context, 'cels' are transparent sheets featuring drawings that are layered
-> atop one another to create the final image. This is conceptually similar
-> (somehow) to how Cels operates with input and patch files.
+> atop one another to create the final image. Cels works in a similar way,
+> creating the final result by layering the patch files over the input documents.
 
 ### Limitations
 
-When considering the use of Cels, it's important to note that there are two key
-limitations to its functionality:
+If you're considering using Cels, please take into account the following limitations:
 
 * Cels is only compatible with documents where the top-level element is
-  a dictionary or map. It does not work with documents where the top-level
+  a dictionary or map. That is, won't work with documents where the top-level
   element is a list.
 * Annotations can only be added to keys that are of the string type.
   This isn't a problem with JSON documents, as all keys are inherently strings.
   However, in YAML documents, keys aren't necessarily strings. While Cels can
-  handle YAML documents with non-string keys, and these keys can also appear in
-  patch files, they cannot be annotated. This means that advanced operations
+  handle YAML documents with non-string keys—and these keys can also appear in
+  patch files—they cannot be annotated. This means that advanced operations
   cannot be applied to them.
 
 ## Installation
@@ -149,9 +156,6 @@ pip install cells
 ```
 
 ## Usage
-
-> This section gives you a very complete overview on how to use the tool. Check [Reference](#reference)  if you prefer to get the list of
-operations and their meaning.
 
 ### The 'patch' command
 
@@ -221,23 +225,19 @@ foo:
     bar:
         b: 200
 ```
-Operations are specified by annotating the dictionary key with appending the
-text `{<operation>}` to it. Actually, the full annotation format is:
+Operations—in their most basic form—are specified by appending the operation
+name between curly braces (`{<operation>}`) to the key string. The full
+annotation format is:
 ```
 key {<operation>[@<index1>,<index2>,...]}
 ```
 where the indices are provided to modify lists (see below [Working with
-lists](#working-with-lists) for more information on that.
-
-The `set` operation is the default one for all data types except for
-dictionaries, which means that most of the time you don't have to explicitly use
-it. For dictionaries, the default operation is `patch`, which merges the keys of
-the dictionary with the associated dictionary in the input file.
+lists](#working-with-lists)).
 
 #### 'delete' and 'rename'
 
-Other basic operations are `delete`, which deletes a key from the input file and
-`rename`, which changes the name of a key, but keeps its value:
+The other basic operations include `delete`, which removes a key, and `rename`,
+which alters the key's name while preserving its value.
 ```
 # input
 foo:
@@ -260,9 +260,10 @@ is just ignored by Cels.
 
 ## Working with Lists
 
-The majority of operations can utilize an index following an `@` symbol. This is
-to indicate that the action should be executed at a specific position within a
-list.
+The majority of operations can utilize an index following an `@` symbol. This
+is to indicate that the action should be executed at a specific position within
+a list (To know if a given operation supports indices, run `patch describe
+operation OPERATION_NAME`, which will provide full information about it).
 
 For example, to change the second element of a list, you can use the `set`
 operation:
@@ -288,15 +289,14 @@ Note that when working with lists:
 * Negative indices can be used. For instance, -1 refers to the last element in
   the list, -2 to the penultimate one, and so on.
 * To specify elements within nested lists, you can provide multiple indices
-  separated by commas. For example, `1,1` refers to `b` in a nested list like
+  separated by commas. For example, `1,0` refers to `c` in a nested list like
   `[[a, b], [c, d]]`.
 
 ### 'insert' and 'extend'
 
-When working with lists, the operations `insert` and `extend` prove to be
-extremely useful.
+The operations `insert` and `extend` are very useful when working with lists.
 
-In the case of `insert` an element is added to the list:
+`insert` adds one element to a list:
 ```yaml
 # input
 foo:
@@ -312,7 +312,7 @@ foo:
   - b
   - c
 ```
-Whereas, in the case of `extend` all the elements of a list are added:
+Whereas, in the case of `extend`, multiple elements are added simultaneously:
 ```yaml
 # input
 foo:
@@ -331,54 +331,43 @@ foo:
   - c
   - d
 ```
-In both cases, you can use indices to specify at which position you want to add
-the elements:
-
-* `{insert@NUM}` and `{extend@NUM}` add the elements _before_ position `NUM`.
-  That is, to add them at the beginning of the list use `{insert@0}` and
-  `{extend@0}`.
-* The special index `_` can be used to indicate that the elements should be
-  _appended_ at the end of the list (i.e. `{insert@_}`). You can omit the `_` to
-  operate on the top level list. That is, `{insert}` and `{extend}` are
-  equivalent to `{insert@_}` and `{extend@_}`. However, if you need to append
-  elements to the end of a nested list, then it is necessary to use it (as
-  otherwise the set of indices would be ambiguous).
-
 In both scenarios, indices can be used to designate the position where you wish
 to add elements:
 
 * `{insert@NUM}` and `{extend@NUM}` place the elements _before_ the `NUM`
-  position. In other words, to insert them at the start of the list, use
-  `{insert@0}` and `{extend@0}`.
+  position. In other words, to insert them at the start of the list, before
+  any other element, use `{insert@0}` and `{extend@0}`.
 * The unique index `_` can be utilized to signify that the elements should be
   _appended_ to the list's end (i.e., `{insert@_}`). The `_` can be omitted when
   operating on the top-level list, meaning `{insert}` and `{extend}` are
   synonymous with `{insert@_}` and `{extend@_}`. However, if you need to append
-  elements to a nested list's end, it's crucial to use it to avoid ambiguity in
-  the position referred by the indices.
+  elements to a nested list's end, it's necessary to use it.
 
 For example, here's how you append an element to the end of a nested list:
 
 ```yaml
 # input
 foo:
-  - a
+- - a
   - b
+- - c
+  - d
 
 # patch
-foo {insert}: c
+foo {insert@1,_}: e
 
 # output
-foo:
-  - a
+- - a
   - b
-  - c
+- - c
+  - d
+  - e
 ```
 
 ### Using variables
 
-It is possible to define variables of any type and then reuse that value, which
-can be of any type, at different places of the patch file.
+It is possible to define variables and then reuse them at different places of
+the patch file.
 
 This is a quick example:
 ```
@@ -399,20 +388,21 @@ As you can see, variables are defined with:
 ```
 key {var}: value
 ```
-where `key` is the name of the variable and `value` its value.
+where `key` is the name of the variable and `value` is, well, its value.
 
-Variable definitions, while not visible in the output document, can be utilized
-through the `use` and `render` operations to insert values in various locations:
+Variable definitions, while not visible in the output document themselves, can
+be utilized through the `use` and `render` operations to insert values in
+various locations:
 
 * The `use` operation simply inserts the variable as is. If the variable is a
   list or a dictionary, `use` will incorporate it without any modifications.
 * The `render` operation allows you to define a
-  [Jinja](https://jinja.palletsprojects.com/en/3.1.x/templates/) template string
-  that can reference one or more variables available at that point. If the
-  variable is a list or a dictionary, you can use the `.` or `[]` notation to
-  pinpoint the exact value you wish to use. Additionally, you can utilize any of
-  the features offered by the Jinja template language, such as filters or
-  conditional structures.
+  [Jinja](https://jinja.palletsprojects.com/en/3.1.x/templates/) template
+  string that can reference one or more variables. If the variable is a list or
+  a dictionary, you can use the `.` or `[]` notation to pinpoint the exact
+  value you wish to use. Additionally, you can utilize any of the features
+  offered by the Jinja template language, such as filters or conditional
+  structures.
 
 The following is a more elaborated example of using variables with the `render`
 operation:
@@ -436,7 +426,7 @@ Please note that a variable comes with an associated scope:
 * The `use` and `render` commands can only reference variables from the same
   dictionary in which they are used, or from any parent or ancestor dictionary.
   In other words, if you want a variable to be accessible throughout the entire
-  document, you should define it in the root dictionary of the document.
+  document, you should define it at its root dictionary.
 * If a variable is redefined in a child dictionary, the value in the child
   dictionary will take precedence over the one in the parent dictionary.
 
@@ -516,7 +506,10 @@ new-foo:
 ```
 The 'link' operation always takes a path that employs the '.' and '[]' notation
 to traverse through the dictionaries and lists within the input document. The
-initial '.' symbol signifies the root dictionary of the document.
+initial '.' symbol signifies the root dictionary of the document. It's important
+to note that the path always refers to the unaltered input document, regardless
+of any other operations being performed. This means that the value indicated by
+the path will always be the original one.
 
 ### Patching dictionaries that are nested in lists
 
@@ -547,9 +540,7 @@ foo:
 
 By default, annotations in Cels appear as `<space>{operation@indices}`. However,
 you can customize all the symbols used to better suit your needs by using the
-command parameters.
-
-For example, the command below:
+following command parameters:
 ```
 cels patch input.yaml patch.yaml \
     --separator "_" \
@@ -557,8 +548,7 @@ cels patch input.yaml patch.yaml \
     --index-marker "%" \
     --right-marker ")"
 ```
-will enable you to write the annotations in the patch file in the following
-format: `_(operation%indices)`.
+This example changes the format of annotations to: `_(operation%indices)`.
 
 ## Getting help
 
@@ -575,7 +565,7 @@ cels describe operation OPERATION_NAME
 
 ![Cels operation information](docs/screenshot-extend-operation.png)
 
-Additionally, by utilizing the `-v` flag, you can activate the verbose output.
+Additionally, with the `-v` flag, you can activate the verbose output.
 This will display the operation that was used to generate each node in the
 output document:
 
@@ -583,7 +573,7 @@ output document:
 
 ## Using Cels as a Python library
 
-You can use Cels programmatically from your Python code. It supplies two basic
+You can use Cels programmatically from your Python code. It provides two basic
 functions: `patch_document` and `patch_dictionary`.
 
 ### patch_document
