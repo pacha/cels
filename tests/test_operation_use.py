@@ -1,7 +1,4 @@
-import pytest
-
-from patchwork.services import patch_dictionary
-from patchwork.exceptions import PatchworkInputError
+from cels.services import patch_dictionary
 
 
 def test_operation_use_simple():

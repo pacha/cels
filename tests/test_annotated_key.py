@@ -1,6 +1,6 @@
-from patchwork.models import Operation
-from patchwork.models import AnnotatedKey
-from patchwork.models import AnnotationConfig
+from cels.models import Operation
+from cels.models import AnnotatedKey
+from cels.models import AnnotationConfig
 
 
 def test_annotated_key_only_key():

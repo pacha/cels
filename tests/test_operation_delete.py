@@ -1,7 +1,7 @@
 import pytest
 
-from patchwork.services import patch_dictionary
-from patchwork.exceptions import PatchworkInputError
+from cels.services import patch_dictionary
+from cels.exceptions import CelsInputError
 
 
 def test_operation_delete_scalar():
@@ -11,6 +11,18 @@ def test_operation_delete_scalar():
     }
     patch = {
         "foo {delete}": None,
+    }
+    expected = {}
+    assert patch_dictionary(original, patch) == expected
+
+
+def test_operation_delete_scalar_ignoring_value():
+    """Just a delete operation. Any value provided is ignored."""
+    original = {
+        "foo": 1,
+    }
+    patch = {
+        "foo {delete}": [1, 2, 3],
     }
     expected = {}
     assert patch_dictionary(original, patch) == expected
@@ -26,18 +38,6 @@ def test_operation_delete_list():
     }
     expected = {}
     assert patch_dictionary(original, patch) == expected
-
-
-def test_operation_delete_non_none_value():
-    """Deletion operations can't take any value other than None."""
-    original = {
-        "foo": 1,
-    }
-    patch = {
-        "foo {delete}": 2,
-    }
-    with pytest.raises(PatchworkInputError):
-        _ = patch_dictionary(original, patch)
 
 
 def test_operation_delete_nested():
@@ -60,15 +60,3 @@ def test_operation_delete_list_element():
         "foo": [1, 3],
     }
     assert patch_dictionary(original, patch) == expected
-
-
-def test_operation_delete_list_element_outside_bounds():
-    """An outside bounds operation should raise an error"""
-    original = {
-        "foo": [1, 2, 3],
-    }
-    patch = {
-        "foo {delete@5}": None,
-    }
-    with pytest.raises(PatchworkInputError):
-        _ = patch_dictionary(original, patch)

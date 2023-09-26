@@ -1,6 +1,12 @@
 name: Type checks
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   type-checks:
@@ -22,4 +28,4 @@ jobs:
         pip install types-pyyaml
 
     - name: Run mypy checks
-      run: mypy patchwork/
+      run: mypy cels/

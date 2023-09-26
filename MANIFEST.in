@@ -1,2 +1,2 @@
-recursive-include patchwork/data *.yaml
+recursive-include cels/data *.yaml
 include LICENSE README.md

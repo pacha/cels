@@ -16,14 +16,14 @@ export PYTHONPATH := project_dir
   black {{ project_dir }}
 
 @type-check:
-  mypy {{ project_dir }}/patchwork/
+  mypy {{ project_dir }}/cels/
 
 @cli:
   ipython
 
 run *params:
   #!/usr/bin/env python3
-  from patchwork.cli import patchwork
+  from cels.cli import cels
   params = "{{ params }}".split()
-  patchwork(params)
+  cels(params)
 

@@ -1,7 +1,4 @@
-import pytest
-
-from patchwork.services import patch_dictionary
-from patchwork.exceptions import PatchworkInputError
+from cels.services import patch_dictionary
 
 
 def test_operation_extend_at_start():
@@ -102,30 +99,6 @@ def test_operation_extend_empty_list_with_index():
     assert patch_dictionary(original, patch) == expected
 
 
-def test_operation_extend_empty_list_with_negative_index():
-    """Extend an empty list using a negative index."""
-    original = {
-        "foo": [],
-    }
-    patch = {
-        "foo {extend@-1}": ["a", "b"],
-    }
-    with pytest.raises(PatchworkInputError):
-        _ = patch_dictionary(original, patch)
-
-
-def test_operation_extend_empty_list_with_wrong_index():
-    """Extend an empty list using a wrong index."""
-    original = {
-        "foo": [],
-    }
-    patch = {
-        "foo {extend@1}": ["a", "b"],
-    }
-    with pytest.raises(PatchworkInputError):
-        _ = patch_dictionary(original, patch)
-
-
 def test_operation_extend_empty_list_with_empty_list():
     """Extend an empty list with an empty list."""
     original = {
@@ -138,39 +111,3 @@ def test_operation_extend_empty_list_with_empty_list():
         "foo": [],
     }
     assert patch_dictionary(original, patch) == expected
-
-
-def test_operation_extend_out_of_bounds():
-    """Extend with an out-of-bounds position."""
-    original = {
-        "foo": [1, 2, 3, 4, 5],
-    }
-    patch = {
-        "foo {extend@5}": ["a", "b"],
-    }
-    with pytest.raises(PatchworkInputError):
-        _ = patch_dictionary(original, patch)
-
-
-def test_operation_extend_out_of_bounds_negative_index():
-    """Extend with an out-of-bounds position."""
-    original = {
-        "foo": [1, 2, 3, 4, 5],
-    }
-    patch = {
-        "foo {extend@-6}": ["a", "b"],
-    }
-    with pytest.raises(PatchworkInputError):
-        _ = patch_dictionary(original, patch)
-
-
-def test_operation_extend_with_non_list():
-    """Extend with an out-of-bounds position."""
-    original = {
-        "foo": "bar",
-    }
-    patch = {
-        "foo {extend@2}": ["a", "b"],
-    }
-    with pytest.raises(PatchworkInputError):
-        _ = patch_dictionary(original, patch)

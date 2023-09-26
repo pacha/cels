@@ -1,3 +1,6 @@
 mypy
 pytest
 black
+types-PyYAML
+build
+twine

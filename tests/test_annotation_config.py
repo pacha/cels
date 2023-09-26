@@ -3,8 +3,8 @@ from dataclasses import dataclass
 
 import pytest
 
-from patchwork.models import AnnotationConfig
-from patchwork.exceptions import PatchworkInputError
+from cels.models import AnnotationConfig
+from cels.exceptions import CelsInputError
 
 
 @dataclass
@@ -17,6 +17,13 @@ class Example:
 
 
 correct_annotation_list = [
+    Example(
+        text="field {}",
+        separator=" ",
+        left_marker="{",
+        right_marker="}",
+        match="",
+    ),
     Example(
         text="field {operation}",
         separator=" ",
@@ -158,12 +165,6 @@ non_annotation_list = [
     Example(text="fie _operation", separator=" ", left_marker="_", right_marker="_"),
 ]
 
-wrong_annotation_list = [
-    # Example(text="field {&}", separator=" ", left_marker="{", right_marker="}"),
-    # Example(text="field {{}", separator=" ", left_marker="{", right_marker="}"),
-    # Example(text="field {}", separator=" ", left_marker="{", right_marker="}"),
-]
-
 
 @pytest.fixture(params=correct_annotation_list)
 def correct_annotation(request):
@@ -172,11 +173,6 @@ def correct_annotation(request):
 
 @pytest.fixture(params=non_annotation_list)
 def non_annotation(request):
-    return request.param
-
-
-@pytest.fixture(params=wrong_annotation_list)
-def wrong_annotation(request):
     return request.param
 
 
@@ -200,13 +196,3 @@ def test_annotation_non_annotations(non_annotation):
         right_marker=non_annotation.right_marker,
     )
     assert not annotation_config.regex.match(non_annotation.text)
-
-
-def test_annotation_wrong_annotations(wrong_annotation):
-    """Check keys that are detected as annotations but raise an error."""
-    with pytest.raises(PatchworkInputError):
-        _ = AnnotationConfig(
-            separator=wrong_annotation.separator,
-            left_marker=wrong_annotation.left_marker,
-            right_marker=wrong_annotation.right_marker,
-        )

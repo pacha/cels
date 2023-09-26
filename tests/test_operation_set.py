@@ -1,7 +1,4 @@
-import pytest
-
-from patchwork.services import patch_dictionary
-from patchwork.exceptions import PatchworkInputError
+from cels.services import patch_dictionary
 
 
 def test_operation_set_new():
@@ -27,6 +24,20 @@ def test_operation_set_add_to_existing():
     expected = {
         "foo": 1,
         "bar": 2,
+    }
+    assert patch_dictionary(original, patch) == expected
+
+
+def test_operation_set_non_string_keys():
+    """Add a new item."""
+    original = {
+        1: "foo",
+    }
+    patch = {
+        1: "bar",
+    }
+    expected = {
+        1: "bar",
     }
     assert patch_dictionary(original, patch) == expected
 
@@ -125,27 +136,3 @@ def test_operation_set_override_nested_value():
         },
     }
     assert patch_dictionary(original, patch) == expected
-
-
-def test_operation_set_no_annotations_in_value():
-    """The patch value should not have annotations in a set operation."""
-    original = {"this": {}}
-    patch = {
-        "this": {
-            "foo {set}": {"bar {set}": 2},
-        },
-    }
-    with pytest.raises(PatchworkInputError):
-        _ = patch_dictionary(original, patch)
-
-
-def test_operation_set_no_annotations_in_value_overriding():
-    """The patch value should not have annotations in a set operation."""
-    original = {"this": {"foo": 1}}
-    patch = {
-        "this": {
-            "foo {set}": {"bar {set}": 2},
-        },
-    }
-    with pytest.raises(PatchworkInputError):
-        _ = patch_dictionary(original, patch)

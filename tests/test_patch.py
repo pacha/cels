@@ -1,5 +1,4 @@
-from patchwork.models import Patch
-from patchwork.models import Operation
+from cels.models import Patch
 
 
 def test_patch_empty():

@@ -1,0 +1,86 @@
+only_in_input = 1
+in_both = 3
+in_both_but_changed = 5
+"new name" = 100
+multiple = [
+    "b",
+    "c",
+]
+list1 = [
+    "foo",
+    [
+        "one",
+        [
+            "up",
+            "mid",
+            100,
+        ],
+        "three",
+    ],
+    "baz",
+]
+"list2.1" = [
+    "a",
+    "b",
+    "c",
+]
+"list3.1" = [
+    "a",
+    "c",
+    "b",
+]
+"list4.1" = [
+    "foo",
+    [
+        "one",
+        [
+            "up",
+            "mid",
+            "down",
+            100,
+        ],
+    ],
+]
+"list2.2" = [
+    "a",
+    "b",
+    "c",
+]
+"list3.2" = [
+    "a",
+    "c",
+    "b",
+]
+"list4.2" = [
+    "foo",
+    [
+        "one",
+        [
+            "up",
+            "mid",
+            "down",
+            100,
+        ],
+    ],
+]
+rendered = "some-text-100!"
+only_in_patch = 2
+
+[nested]
+bar = 1
+baz = 100
+
+[nested_literal]
+baz = 100
+
+[to_link.one]
+two = 100
+
+[linked.one]
+two = 100
+
+[use_var1.foo]
+bar = 100
+
+[use_var2.foo]
+bar = 100
