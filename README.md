@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="docs/cels-logo-header.png" alt="logo" width="100%">
+    <img src="https://raw.githubusercontent.com/pacha/cels/main/docs/cels-logo-header.png" alt="logo" width="100%">
 </p>
 
 cels
@@ -33,8 +33,8 @@ list {insert}: c
 level {delete}: null
 ```
 
-```shell
-$ cels patch input.yaml patch.yaml
+```yaml
+# command: cels patch input.yaml patch.yaml
 foo:
   bar: 100
   baz: 2
@@ -254,7 +254,7 @@ foo:
 
 # output
 foo:
-    newbar "A Fair Field Full of Folk"
+    newbar: "A Fair Field Full of Folk"
 ```
 For the `delete` operation, you can pass any value (in this case `null`) as it
 is just ignored by Cels.
@@ -564,13 +564,13 @@ examples, you can use:
 $ cels describe operation OPERATION_NAME
 ```
 
-![Cels operation information](docs/screenshot-extend-operation.png)
+![Cels operation information](https://raw.githubusercontent.com/pacha/cels/main/docs/screenshot-extend-operation.png)
 
 Additionally, with the `-v` flag, you can activate the verbose output.
 This will display the operation that was used to generate each node in the
 output document:
 
-![Cels debug information](docs/screenshot-verbose-output.png)
+<img src="https://raw.githubusercontent.com/pacha/cels/main/docs/screenshot-verbose-output.png" alt="Cels screenshot" width="50%">
 
 ## Using Cels as a Python library
 
@@ -611,9 +611,9 @@ In both cases (`patch_document` and `patch_dictionary`), you can pass
 define the format of the key annotations (see [Changing the annotation
 format](#changing-the-annotation-format) for more information).
 
-> Deepcopy
+> _Deepcopy_
 >
-> For performance reasosns, Cels' Python functions do not generate a complete copy of the
+> For performance reasons, Cels' Python functions do not generate a complete copy of the
 > output dictionary in memory. Instead, Cels interlaces the input and patch
 > nodes, merging them to produce the final result.
 >
@@ -627,7 +627,8 @@ format](#changing-the-annotation-format) for more information).
 >
 > ```python
 > from copy import deepcopy
-> from cels import patch_dictionary > 
+> from cels import patch_dictionary
+>
 > result = deepcopy(patch_dictionary(input_dict, patch_dict))
 > ```
 
