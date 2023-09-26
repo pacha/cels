@@ -10,7 +10,7 @@ jobs:
     name: Build distribution
     runs-on: ubuntu-latest
     outputs:
-      abort: ${{ steps.check-version.outputs.abort }}
+      version: ${{ steps.check-version.outputs.version }}
 
     steps:
     - uses: actions/checkout@v4
@@ -26,32 +26,58 @@ jobs:
         git fetch --prune --unshallow
         VERSION=$(grep "^version" pyproject.toml | head -1 | awk '{print $3}' | sed 's/"//g')
         TAG=$(git tag --sort=-v:refname | head -1)
-        if [ "v$VERSION" == "$TAG" ]; then
+        if [ "$VERSION" == "$TAG" ]; then
           echo "Version was not bumped in pyproject.toml"
-          echo ::set-output name=abort::1
+          echo "::set-output name=version::"
+        else
+          echo "::set-output name=version::$VERSION"
         fi
 
     - name: Install pypa/build
-      if: steps.check-version.outputs.abort != '1'
+      if: steps.check-version.outputs.version != ''
       run: >-
         python3 -m pip install build --user
 
     - name: Build a binary wheel and a source tarball
-      if: steps.check-version.outputs.abort != '1'
+      if: steps.check-version.outputs.version != ''
       run: python3 -m build
 
     - name: Store the distribution packages
-      if: steps.check-version.outputs.abort != '1'
+      if: steps.check-version.outputs.version != ''
       uses: actions/upload-artifact@v3
       with:
         name: python-package-distributions
         path: dist/
 
+  publish-to-testpypi:
+    name: Publish Python distribution to TestPyPI
+    needs:
+    - build
+    if: needs.build.outputs.version != ''
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/cels
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
+
+    steps:
+    - name: Download all the dists
+      uses: actions/download-artifact@v3
+      with:
+        name: python-package-distributions
+        path: dist/
+
+    - name: Publish distribution to TestPyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://test.pypi.org/legacy/
+
   publish-to-pypi:
     name: Publish Python distribution to PyPI
     needs:
     - build
-    if: needs.build.outputs.abort != '1'
+    if: needs.build.outputs.version != ''
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -74,6 +100,7 @@ jobs:
       Sign the Python distribution with Sigstore
       and create GitHub Release
     needs:
+    - build
     - publish-to-pypi
     runs-on: ubuntu-latest
     permissions:
@@ -81,7 +108,6 @@ jobs:
       id-token: write  # IMPORTANT: mandatory for sigstore
 
     steps:
-
     - name: Download all the dists
       uses: actions/download-artifact@v3
       with:
@@ -101,32 +127,7 @@ jobs:
       # Upload to GitHub Release using the `gh` CLI.
       # `dist/` contains the built packages, and the
       # sigstore-produced signatures and certificates.
-      run: >-
-        gh release upload
-        '${{ github.ref_name }}' dist/**
-        --repo '${{ github.repository }}'
+      run: |
+        gh release create '${{ needs.build.outputs.version }}'
+        gh release upload '${{ needs.build.outputs.version }}' dist/** --repo '${{ github.repository }}'
 
-  publish-to-testpypi:
-    name: Publish Python distribution to TestPyPI
-    needs:
-    - build
-    if: needs.build.outputs.abort != '1'
-    runs-on: ubuntu-latest
-    environment:
-      name: testpypi
-      url: https://test.pypi.org/p/cels
-    permissions:
-      id-token: write  # IMPORTANT: mandatory for trusted publishing
-
-    steps:
-
-    - name: Download all the dists
-      uses: actions/download-artifact@v3
-      with:
-        name: python-package-distributions
-        path: dist/
-
-    - name: Publish distribution to TestPyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        repository-url: https://test.pypi.org/legacy/
