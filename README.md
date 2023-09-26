@@ -8,6 +8,7 @@ cels
 ![Tests](https://github.com/pacha/cels/actions/workflows/tests.yaml/badge.svg)
 ![Type checks](https://github.com/pacha/cels/actions/workflows/type-checks.yaml/badge.svg)
 ![Code formatting](https://github.com/pacha/cels/actions/workflows/code-formatting.yaml/badge.svg)
+![Supported Python versions](https://img.shields.io/pypi/pyversions/cels.svg)
 
 _Command line tool to patch your YAML and JSON files_
 
@@ -32,7 +33,7 @@ list {insert}: c
 level {delete}: null
 ```
 
-```
+```shell
 $ cels patch input.yaml patch.yaml
 foo:
   bar: 100
@@ -50,20 +51,20 @@ modifications to YAML, JSON, or TOML documents. These modifications are based on
 changes specified in a _patch_ file. The patch file is written in the same
 format as the original data and mirrors its structure. For instance, if you want
 to change the `bar` key value from `hello` to `bye` in this example:
-```
+```yaml
 foo:
   bar: hello
 ```
 You simply need to create a patch like this:
-```
+```yaml
 foo:
   bar: bye
 ```
 
 To run the tool and get the result, you just pass both files as arguments to
 the `cels patch` command:
-```
-cels patch input.yaml output.yaml
+```shell
+$ cels patch input.yaml output.yaml
 ```
 
 For more complex modifications, you can annotate the keys of the patch
@@ -151,8 +152,8 @@ If you're considering using Cels, please take into account the following limitat
 ## Installation
 
 To install cells, simply use `pip`:
-```
-pip install cells
+```shell
+$ pip install cells
 ```
 
 ## Usage
@@ -184,7 +185,7 @@ for more information).
 
 To override values of the input document, you don't typically need to specify
 any operation in the patch file:
-```
+```yaml
 # input
 foo:
     bar:
@@ -207,7 +208,7 @@ foo:
 As shown in this example, dictionaries in the patch file get merged with
 the ones in the input file. However, if you want to override an entire
 dictionary, instead of merging it, you can use the operation `set`:
-```
+```yaml
 # input
 foo:
     bar:
@@ -238,7 +239,7 @@ lists](#working-with-lists)).
 
 The other basic operations include `delete`, which removes a key, and `rename`,
 which alters the key's name while preserving its value.
-```
+```yaml
 # input
 foo:
     bar: "A Fair Field Full of Folk"
@@ -370,7 +371,7 @@ It is possible to define variables and then reuse them at different places of
 the patch file.
 
 This is a quick example:
-```
+```yaml
 # input
 foo: 1
 
@@ -385,7 +386,7 @@ bar: "Hello Wold!"
 ```
 
 As you can see, variables are defined with:
-```
+```yaml
 key {var}: value
 ```
 where `key` is the name of the variable and `value` is, well, its value.
@@ -406,7 +407,7 @@ various locations:
 
 The following is a more elaborated example of using variables with the `render`
 operation:
-```
+```yaml
 # patch
 my_var {var}:
   one: a
@@ -434,7 +435,7 @@ Please note that a variable comes with an associated scope:
 
 If you want to perform multiple changes to the same key, you can use the
 `change` operation, that takes a list of the modifications to perform:
-```
+```yaml
 # input
 foo: 1
 
@@ -488,7 +489,7 @@ standard annotation: `key {operation@indices}: value`.
 The `link` operation allows you to reference parts of the input document and
 reuse them in other parts. For instance, here we use the `link` operation to
 remove the `bar` level from the input document:
-```
+```yaml
 # input
 foo:
   bar:
@@ -520,7 +521,7 @@ document. However, when dealing with dictionaries within lists, it becomes
 essential to use `patch` because you need to specify the index that indicates
 the dictionary's position within the list. Here's an example:
 
-```
+```yaml
 # input
 foo:
 - a: 1
@@ -541,8 +542,8 @@ foo:
 By default, annotations in Cels appear as `<space>{operation@indices}`. However,
 you can customize all the symbols used to better suit your needs by using the
 following command parameters:
-```
-cels patch input.yaml patch.yaml \
+```shell
+$ cels patch input.yaml patch.yaml \
     --separator "_" \
     --left-marker "(" \
     --index-marker "%" \
@@ -553,14 +554,14 @@ This example changes the format of annotations to: `_(operation%indices)`.
 ## Getting help
 
 To list all available operations, you can use:
-```
-cels list operations
+```shell
+$ cels list operations
 ```
 
 To show help for a given operation, including its description and usage
 examples, you can use:
-```
-cels describe operation OPERATION_NAME
+```shell
+$ cels describe operation OPERATION_NAME
 ```
 
 ![Cels operation information](docs/screenshot-extend-operation.png)
@@ -580,7 +581,7 @@ functions: `patch_document` and `patch_dictionary`.
 
 `patch_document` allows you to pass JSON, YAML or TOML text for the input and
 patch documents, in the same way that they are passed to the `cels` command:
-```
+```python
 from cels import patch_document
 
 output = patch_document(input_format, input_text, patch_format, patch_text, output_format)
@@ -599,7 +600,7 @@ Finally, it is possible to specify the format of the output text with
 
 `patch_dictionary` works exactly the same as `patch_document` but the data is
 passed already in the format of python dictionaries:
-```
+```python
 from cels import patch_dictionary
 
 result = patch_dictionary(input_dict, patch_dict)
@@ -609,6 +610,26 @@ In both cases (`patch_document` and `patch_dictionary`), you can pass
 `separator`, `left_marker`, `index_marker` and `right_marker` parameters to
 define the format of the key annotations (see [Changing the annotation
 format](#changing-the-annotation-format) for more information).
+
+> Deepcopy
+>
+> For performance reasosns, Cels' Python functions do not generate a complete copy of the
+> output dictionary in memory. Instead, Cels interlaces the input and patch
+> nodes, merging them to produce the final result.
+>
+> This approach works well if you only need to read the output. However, if you
+> alter it in-place, you may inadvertently modify nodes of the input dictionary
+> at the same time.
+>
+> If you need to change the output dictionary without affecting the input and
+> patch dictionaries, simply create a _deep copy_ of the dictionary returned by
+> the Cels functions:
+>
+> ```python
+> from copy import deepcopy
+> from cels import patch_dictionary > 
+> result = deepcopy(patch_dictionary(input_dict, patch_dict))
+> ```
 
 ## Similar Projects
 
