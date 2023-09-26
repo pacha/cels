@@ -28,7 +28,7 @@ jobs:
     - name: Install dependencies
       run: pip install pytest
 
-    - name: Install patchwork package
+    - name: Install package
       run: pip install .
 
     - name: Run tests

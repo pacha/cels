@@ -28,4 +28,4 @@ jobs:
         pip install types-pyyaml
 
     - name: Run mypy checks
-      run: mypy patchwork/
+      run: mypy cels/
