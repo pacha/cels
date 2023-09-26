@@ -128,6 +128,6 @@ jobs:
       # `dist/` contains the built packages, and the
       # sigstore-produced signatures and certificates.
       run: |
-        gh release create '${{ needs.build.outputs.version }}'
+        gh release create '${{ needs.build.outputs.version }}' --repo '${{ github.repository }}'
         gh release upload '${{ needs.build.outputs.version }}' dist/** --repo '${{ github.repository }}'
 
