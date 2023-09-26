@@ -2,11 +2,7 @@ import sys
 
 
 import click
-from rich import box
-from rich.table import Table
 from rich.console import Console
-from rich.columns import Columns
-from rich.panel import Panel
 from rich.syntax import Syntax
 
 from cels.logs import log

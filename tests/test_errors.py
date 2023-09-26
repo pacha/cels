@@ -581,3 +581,13 @@ def test_error_delete_list_element_outside_bounds():
     with pytest.raises(CelsInputError) as err:
         _ = patch_dictionary(original, patch)
     log.info(err.value.args[0])
+
+
+def test_error_list_as_root():
+    """The root element must be a dictionary."""
+    original = [1, 2, 3]
+    patch = {}
+
+    with pytest.raises(CelsInputError) as err:
+        _ = patch_dictionary(original, patch)
+    log.info(err.value.args[0])

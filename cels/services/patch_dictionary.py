@@ -6,6 +6,7 @@ from cels.models import Path
 from cels.models import Patch
 from cels.models import KeyLocation
 from cels.models import AnnotationConfig
+from cels.exceptions import CelsInputError
 from cels.exceptions import CelsActionPatch
 from cels.exceptions import CelsActionRename
 
@@ -19,6 +20,10 @@ def patch_dictionary(
     right_marker: str = default.right_marker,
 ) -> dict:
     """Patch a dictionary."""
+    if not isinstance(input_dict, dict) or not isinstance(patch_dict, dict):
+        raise CelsInputError(
+            "Cels can only process input and patch documents in which the root element is a dictionary."
+        )
     return patch_dictionary_rec(
         path=Path(),
         parent_patch=None,
