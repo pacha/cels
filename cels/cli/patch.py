@@ -133,8 +133,8 @@ def cels_patch(
     output_format = output_format.lower()
 
     # compose output
-    input_text = input_file.read_text()
-    patch_text = patch_file.read_text()
+    input_text = input_file.read_text(encoding="utf-8")
+    patch_text = patch_file.read_text(encoding="utf-8")
     try:
         output_text = patch_document(
             input_format=input_format,
@@ -153,7 +153,7 @@ def cels_patch(
 
     # save result
     try:
-        with click.open_file(output_file, "w") as f:
+        with click.open_file(output_file, "w", encoding="utf-8") as f:
             f.write(output_text)
     except OSError as err:
         log.error(f"Error found when saving output file: {err}")

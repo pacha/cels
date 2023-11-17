@@ -72,7 +72,7 @@ class Operation:
         return cls.instances[name]
 
     @classmethod
-    def get_all(cls) -> "list[Operation]":
+    def get_all(cls) -> "List[Operation]":
         return list(cls.instances.values())
 
     def __str__(self):

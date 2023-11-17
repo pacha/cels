@@ -368,3 +368,30 @@ def test_yaml_multiple_changes(fixtures_path):
 
     output = patch_yaml(input, patch).strip()
     assert output == result
+
+
+def test_yaml_special_chars():
+    input = cleandoc(
+        """
+
+    Name: "María"
+    Straße: "221B Baker Street"
+
+    """
+    )
+    patch = cleandoc(
+        """
+    Name: "Jörg"
+    """
+    )
+    result = cleandoc(
+        """
+
+    Name: Jörg
+    Straße: 221B Baker Street
+
+    """
+    )
+
+    output = patch_yaml(input, patch).strip()
+    assert output == result
