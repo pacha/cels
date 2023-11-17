@@ -31,8 +31,8 @@ dump_functions: Dict[str, Callable] = {
 }
 
 dump_parameters: Dict[str, Dict[str, Any]] = {
-    "yaml": {"sort_keys": False},
-    "json": {"indent": 2},
+    "yaml": {"sort_keys": False, "allow_unicode": True},
+    "json": {"indent": 2, "ensure_ascii": False},
     "toml": {},
 }
 
