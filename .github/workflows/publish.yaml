@@ -1,4 +1,4 @@
-name: Publish Python distribution
+name: Publish Python Distribution
 
 on:
   push:
@@ -35,8 +35,8 @@ jobs:
 
     - name: Install pypa/build
       if: steps.check-version.outputs.version != ''
-      run: >-
-        python3 -m pip install build --user
+      run: |
+        pip install ".[publish]"
 
     - name: Build a binary wheel and a source tarball
       if: steps.check-version.outputs.version != ''

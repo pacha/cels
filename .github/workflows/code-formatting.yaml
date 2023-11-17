@@ -1,4 +1,4 @@
-name: Code formatting
+name: Code Formatting
 
 on:
   push:
@@ -22,8 +22,9 @@ jobs:
       with:
         python-version: 3.11
 
-    - name: Install dependencies
-      run: pip install black
+    - name: Install packages
+      run: |
+        pip install ".[code-formatting]"
 
     - name: Run black check
       run: black --check .

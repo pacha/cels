@@ -31,6 +31,24 @@ dependencies = [
 "Homepage" = "https://github.com/pacha/cels"
 "Bug Tracker" = "https://github.com/pacha/cels/issues"
 
+[project.optional-dependencies]
+dev = [
+  "cels[tests,type-checks,code-formatting]",
+]
+tests = [
+  "pytest",
+]
+type-checks = [
+  "mypy",
+  "types-pyyaml",
+]
+code-formatting = [
+  "black",
+]
+publish = [
+  "build",
+]
+
 [project.scripts]
 cels = "cels.cli:cels"
 

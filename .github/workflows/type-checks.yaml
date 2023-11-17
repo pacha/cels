@@ -22,10 +22,9 @@ jobs:
       with:
         python-version: 3.11
 
-    - name: Install dependencies
+    - name: Install packages
       run: |
-        pip install mypy
-        pip install types-pyyaml
+        pip install ".[type-checks]"
 
     - name: Run mypy checks
-      run: mypy cels/
+      run: mypy .
