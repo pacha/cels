@@ -33,6 +33,7 @@ from .action_insert import action_insert
 from .action_extend import action_extend
 from .action_rename import action_rename
 from .action_delete import action_delete
+from .action_delete_value import action_delete_value
 
 actions = {
     "keep": action_keep,
@@ -45,4 +46,5 @@ actions = {
     "extend": action_extend,
     "rename": action_rename,
     "delete": action_delete,
+    "delete_value": action_delete_value,
 }

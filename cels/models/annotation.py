@@ -20,7 +20,7 @@ class Annotation:
     def __init__(self, raw_annotation: str, index_marker: str = default.index_marker):
         # extract parts from the raw annotation string
         self.index_marker = re.escape(index_marker)
-        operation_pattern = r"([a-z]+)"
+        operation_pattern = r"([a-z_]+)"
         index_pattern = r"((?: *_ *)|(?: *-?[0-9]+ *(?:, *-?[0-9]+ *)*(?:, *_ *)?))"
         pattern = f"^{operation_pattern}(?:{self.index_marker}{index_pattern})?$"
         regex = re.compile(pattern)

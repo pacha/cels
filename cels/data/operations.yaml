@@ -79,6 +79,48 @@ operations:
           foo:
             - bar
 
+  - name: "delete_value"
+    format: "key {delete_value[@index1,index2,…]}: value"
+    description: Delete a value from a list.
+    takes_indices: true
+    takes_underscore_index: false
+    requires_value: true
+    value_type: "Any"
+    notes: >-
+      Removes all the occurrences of 'value' from the input list.
+      If 'value' is not present in the list, the list is not modified.
+    examples:
+      - title: "Remove single value from list"
+        code: |
+          # input
+          foo: [1, 2, 3]
+
+          # patch
+          foo {delete_value}: 2
+
+          # output
+          foo: [1, 3]
+      - title: "Remove all occurrences of a given value"
+        code: |
+          # input
+          foo: [1, 2, 3, 2]
+
+          # patch
+          foo {delete_value}: 2
+
+          # output
+          foo: [1, 3]
+      - title: "Remove value from a nested list"
+        code: |
+          # input
+          foo: [100, [1, 2, 3], 200]
+
+          # patch
+          foo {delete_value@1}: 2
+
+          # output
+          foo: [100, [1, 3], 200]
+
   - name: "extend"
     format: "key {extend[@index1,index2,…,_]}: value"
     description: Extend a list with the elements of the provided list.
