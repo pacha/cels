@@ -111,3 +111,32 @@ def test_operation_render_built_in_filter():
         "bar": "10",
     }
     assert patch_dictionary(original, patch) == expected
+
+
+def test_operation_render_get_function():
+    """Retrieve a value from the original dictionary using the provided _get function."""
+    original = {
+        "foo": 100,
+    }
+    patch = {
+        "bar {render}": "The value is {{ _get('.foo') }}",
+    }
+    expected = {
+        "foo": 100,
+        "bar": "The value is 100",
+    }
+    assert patch_dictionary(original, patch) == expected
+
+
+def test_operation_render_get_function_with_nested_list():
+    """Retrieve a value from the original dictionary using the provided _get function."""
+    original = {
+        "section": ["foo", "bar"],
+    }
+    patch = {
+        "section {render@1}": "{{ _get('.section[1]') | upper }}",
+    }
+    expected = {
+        "section": ["foo", "BAR"],
+    }
+    assert patch_dictionary(original, patch) == expected
