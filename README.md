@@ -111,9 +111,9 @@ After applying the patch, the result would be:
 }
 ```
 
-Cels supports a variety of operations (`set`, `delete`, `rename`, `insert`,
-`extend`, `use`, `link`, `render`), and most of them can optionally take indices
-to work with any level of nested lists.
+Cels supports a variety of operations (`set`, `delete`, `delete_value`,
+`rename`, `insert`, `extend`, `use`, `link`, `render`), and most of them can
+optionally take indices to work with any level of nested lists.
 
 Cells can be beneficial when you possess a base configuration file or manifest
 for a system and need to tailor it to various environments (eg. 'development'
@@ -363,6 +363,52 @@ foo {insert@1,_}: e
 - - c
   - d
   - e
+```
+
+### 'delete_value'
+
+The operation `delete_value` removes all occurrences of a given value from a list:
+
+```yaml
+# input
+foo:
+  - a
+  - b
+  - a
+
+# patch
+foo {delete_value}: a
+
+# output
+foo:
+  - b
+```
+
+It is also possible to delete values from nested lists using indices and delete
+entire objects (not only scalars):
+
+```yaml
+# input
+foo:
+  - a
+  - b
+  - - c
+    - d
+    - x: 1
+      y: 2
+
+
+# patch
+foo {delete_value@2}:
+    x: 1
+    y: 2
+
+# output
+foo:
+  - a
+  - b
+  - - c
+    - d
 ```
 
 ### Using variables
@@ -764,18 +810,6 @@ For comparison, the equivalent Cels patch would look like:
   }
 }
 ```
-
-As shown in the examples, `RFC 7396` and Cels are very similar conceptually,
-however:
-
-* `RFC 7396` only supports leaving a key untouched, overriding it or deleting
-  it. Cels, on the other hand, offers a wider range of options.
-* Cels can operate on the elements of lists, while that's not possible in `RFC 7396`.
-* `RFC 7396` only supports JSON, while Cels can work with YAML and TOML too.
-* `RFC 7396` uses `null` to delete keys from the original dictionary. However,
-  `null` is a completely valid value in a JSON file, which makes `RFC 7396`
-  unable of representing certain valid JSON documents (in particular, it is not
-  possible to set a key to `null` as it would be deleted instead).
 
 These examples illustrate that `RFC 7396` and Cels share many similarities, but
 there are key differences:

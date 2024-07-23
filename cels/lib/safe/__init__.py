@@ -5,4 +5,5 @@ from .safe_traverse import safe_traverse
 from .safe_get import safe_get
 from .safe_set import safe_set
 from .safe_del import safe_del
+from .safe_del_value import safe_del_value
 from .safe_extend import safe_extend
