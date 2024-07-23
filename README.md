@@ -551,12 +551,36 @@ new-foo:
   one: 1
   two: 2
 ```
-The 'link' operation always takes a path that employs the '.' and '[]' notation
+The `link` operation always takes a path that employs the `.` and `[]` notation
 to traverse through the dictionaries and lists within the input document. The
-initial '.' symbol signifies the root dictionary of the document. It's important
+initial `.` symbol signifies the root dictionary of the document. It's important
 to note that the path always refers to the unaltered input document, regardless
 of any other operations being performed. This means that the value indicated by
 the path will always be the original one.
+
+One limitation of the `link` operation is that it just copies a part of the
+input document as it is. If you need to reference a value from the input
+document but you also require to modify it in some form, you can use a combination
+of the `render` operation and `_get` template function. Here's an example:
+
+```yaml
+# input
+foo:
+  - one
+  - two
+
+# patch
+foo {render@1}: "{{ _get('.foo[1]') | upper }}"
+
+# output
+foo:
+  - one
+  - TWO
+```
+
+`_get()` takes as parameter the path of the value in the input document that
+you want to use (using the same dot notation than with `link`) and returns such
+a value.
 
 ### Patching dictionaries that are nested in lists
 
