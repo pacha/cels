@@ -578,6 +578,10 @@ foo:
   - TWO
 ```
 
+`_get()` takes as parameter the path of the value in the input document that
+you want to use (using the same dot notation than with `link`) and returns such
+a value.
+
 ### Patching dictionaries that are nested in lists
 
 If you need to modify a dictionary within a list, you can utilize the `patch`

@@ -1,5 +1,0 @@
-# patch
-foo {delete_value@2}:
-    x: 1
-    y: 2
-
