@@ -4,6 +4,7 @@ from pathlib import Path
 import click
 
 from cels.logs import log
+from cels.logs import configure_logging
 from cels import default
 from cels.services import patch_document
 from cels.exceptions import CelsError
@@ -103,7 +104,7 @@ def cels_patch(
     """Patch a yaml, json or toml file."""
 
     # setup logging
-    log.setLevel("DEBUG" if verbose else "WARN")
+    configure_logging("DEBUG" if verbose else "WARN")
 
     # infer and normalize input format
     if not input_format:

@@ -21,6 +21,9 @@ export PYTHONPATH := project_dir
 @cli:
   ipython
 
+@setup:
+  pip install -e ".[dev]"
+
 run *params:
   #!/usr/bin/env python3
   from cels.cli import cels
