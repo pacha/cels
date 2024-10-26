@@ -15,3 +15,4 @@ def configure_logging(level):
 
 
 log = logging.getLogger("cels")
+log.addHandler(logging.NullHandler())
