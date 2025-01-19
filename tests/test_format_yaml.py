@@ -395,3 +395,115 @@ def test_yaml_special_chars():
 
     output = patch_yaml(input, patch).strip()
     assert output == result
+
+
+def test_yaml_custom_tags():
+    input = cleandoc(
+        """
+    database:
+      host: localhost
+      port: 5432
+      username: !secret 'db_username'
+      password: !secret 'db_password'
+
+    """
+    )
+    patch = cleandoc(
+        """
+    database:
+      host: localhost
+      port: 5555
+    """
+    )
+    result = cleandoc(
+        """
+
+    database:
+      host: localhost
+      port: 5555
+      username: !secret 'db_username'
+      password: !secret 'db_password'
+
+    """
+    )
+
+    output = patch_yaml(input, patch).strip()
+    assert output == result
+
+
+def test_yaml_custom_tags_override():
+    input = cleandoc(
+        """
+    foo:
+      username: !secret 'user 1'
+      password: !secret 'db_password'
+
+    """
+    )
+    patch = cleandoc(
+        """
+    foo:
+      username: !secret 'user 2'
+    """
+    )
+    result = cleandoc(
+        """
+
+    foo:
+      username: !secret 'user 2'
+      password: !secret 'db_password'
+
+    """
+    )
+
+    output = patch_yaml(input, patch).strip()
+    assert output == result
+
+
+def test_yaml_custom_tags_non_string():
+    input = cleandoc(
+        """
+    foo:
+      bar: !one_tag
+      - one
+      - two
+      - three
+      baz: !other_tag
+      - spam
+      - eggs
+      bat: !even_one_more_tag
+      - this
+      - that
+    """
+    )
+    patch = cleandoc(
+        """
+    foo:
+      baz:
+      - four
+      - five
+      bat: !new_tag
+      - six
+      - seven
+    """
+    )
+    result = cleandoc(
+        """
+
+    foo:
+      bar: !one_tag
+      - one
+      - two
+      - three
+      baz:
+      - four
+      - five
+      bat: !new_tag
+      - six
+      - seven
+
+    """
+    )
+
+    output = patch_yaml(input, patch).strip()
+    assert output == result

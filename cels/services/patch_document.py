@@ -14,24 +14,36 @@ import tomli_w
 
 from cels import default
 from cels.exceptions import CelsInputError
+from cels.lib.yaml_parsing import SafePreserveTagLoader
+from cels.lib.yaml_parsing import SafePreserveTagDumper
 
 from .patch_dictionary import patch_dictionary
 
 
 load_functions: Dict[str, Callable] = {
-    "yaml": yaml.safe_load,
+    "yaml": yaml.load,
     "json": json.loads,
     "toml": toml.loads,
 }
 
+load_parameters: Dict[str, Dict[str, Any]] = {
+    "yaml": {"Loader": SafePreserveTagLoader},
+    "json": {},
+    "toml": {},
+}
+
 dump_functions: Dict[str, Callable] = {
-    "yaml": yaml.safe_dump,
+    "yaml": yaml.dump,
     "json": json.dumps,
     "toml": tomli_w.dumps,
 }
 
 dump_parameters: Dict[str, Dict[str, Any]] = {
-    "yaml": {"sort_keys": False, "allow_unicode": True},
+    "yaml": {
+        "Dumper": SafePreserveTagDumper,
+        "sort_keys": False,
+        "allow_unicode": True,
+    },
     "json": {"indent": 2, "ensure_ascii": False},
     "toml": {},
 }
@@ -56,7 +68,8 @@ def patch_document(
 
     # get input dictionary
     try:
-        input_dict = load_functions[input_format](input_text) or {}
+        parameters = load_parameters[input_format]
+        input_dict = load_functions[input_format](input_text, **parameters) or {}
     except KeyError:
         raise CelsInputError(
             f"Error reading input text: '{input_format}' is not a valid format. "
@@ -67,7 +80,8 @@ def patch_document(
 
     # get patch dictionary
     try:
-        patch_dict = load_functions[patch_format](patch_text) or {}
+        parameters = load_parameters[patch_format]
+        patch_dict = load_functions[patch_format](patch_text, **parameters) or {}
     except KeyError:
         raise CelsInputError(
             f"Error reading patch: '{patch_format}' is not a valid format. "
