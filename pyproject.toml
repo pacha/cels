@@ -1,16 +1,14 @@
 [project]
 name = "cels"
-version = "0.3.1"
+version = "0.3.2"
 authors = [
     {name="Andrés Sopeña Pérez", email="code@ehmm.org"},
 ]
 description = "Patch your YAML and JSON files."
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
