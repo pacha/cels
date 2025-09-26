@@ -7,26 +7,19 @@ export PYTHONPATH := project_dir
   just --list
 
 @test-all:
-  pytest --capture=no -o log_cli=false tests/
+  uv run pytest --capture=no -o log_cli=false tests/
 
 @test *params:
-  pytest -x --capture=no -o log_cli=true {{ params }}
+  uv run pytest -x --capture=no -o log_cli=true {{ params }}
 
 @format:
-  black {{ project_dir }}
+  uv run black {{ project_dir }}
 
 @type-check:
-  mypy {{ project_dir }}/cels/
+  uv run mypy {{ project_dir }}/cels/
 
 @cli:
-  ipython
+  uv run ipython
 
 @setup:
-  pip install -e ".[dev]"
-
-run *params:
-  #!/usr/bin/env python3
-  from cels.cli import cels
-  params = "{{ params }}".split()
-  cels(params)
-
+  uv run pip install -e ".[dev]"

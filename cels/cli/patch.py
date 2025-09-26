@@ -50,6 +50,23 @@ format_extensions = {
     help="File to write the result to. If not provided, STDOUT is used.",
 )
 @click.option(
+    "-I",
+    "--in-place",
+    is_flag=True,
+    help="Overwrite the input file with the patched result.",
+)
+@click.option(
+    "--indent",
+    default=default.indent,
+    type=click.INT,
+    help="Indent to use in the output file.",
+)
+@click.option(
+    "--sort-keys",
+    is_flag=True,
+    help="Sort dictionary keys alphabetically in the output file (only for JSON and YAML).",
+)
+@click.option(
     "--separator",
     default=default.separator,
     help="Character/text to separate patch keys from patch annotations.",
@@ -95,6 +112,9 @@ def cels_patch(
     input_format,
     patch_format,
     output_format,
+    in_place,
+    indent,
+    sort_keys,
     separator,
     left_marker,
     index_marker,
@@ -133,6 +153,19 @@ def cels_patch(
         output_format = input_format
     output_format = output_format.lower()
 
+    # set output file
+    if in_place:
+        if output_file != Path("-"):
+            raise click.UsageError(
+                "Options --in-place and --output-file are mutually exclusive."
+            )
+        elif input_format != output_format:
+            raise click.UsageError(
+                "Options --output-format can't be different from the input format when --in-place is used."
+            )
+        else:
+            output_file = input_file
+
     # compose output
     input_text = input_file.read_text(encoding="utf-8")
     patch_text = patch_file.read_text(encoding="utf-8")
@@ -143,6 +176,8 @@ def cels_patch(
             patch_format=patch_format,
             patch_text=patch_text,
             output_format=output_format,
+            indent=indent,
+            sort_keys=sort_keys,
             separator=separator,
             left_marker=left_marker,
             index_marker=index_marker,
