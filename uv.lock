@@ -74,12 +74,6 @@ dependencies = [
 code-formatting = [
     { name = "black" },
 ]
-dev = [
-    { name = "black" },
-    { name = "mypy" },
-    { name = "pytest" },
-    { name = "types-pyyaml" },
-]
 publish = [
     { name = "build" },
 ]
@@ -95,7 +89,6 @@ type-checks = [
 requires-dist = [
     { name = "black", marker = "extra == 'code-formatting'" },
     { name = "build", marker = "extra == 'publish'" },
-    { name = "cels", extras = ["tests", "type-checks", "code-formatting"], marker = "extra == 'dev'" },
     { name = "click", specifier = ">=8.1.5" },
     { name = "jinja2", specifier = ">=3.1.2" },
     { name = "mypy", marker = "extra == 'type-checks'" },

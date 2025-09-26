@@ -3,65 +3,65 @@ in_both = 3
 in_both_but_changed = 5
 "new name" = 100
 multiple = [
-    "b",
-    "c",
+  "b",
+  "c",
 ]
 list1 = [
-    "foo",
+  "foo",
+  [
+    "one",
     [
-        "one",
-        [
-            "up",
-            "mid",
-            100,
-        ],
-        "three",
+      "up",
+      "mid",
+      100,
     ],
-    "baz",
+    "three",
+  ],
+  "baz",
 ]
 "list2.1" = [
-    "a",
-    "b",
-    "c",
+  "a",
+  "b",
+  "c",
 ]
 "list3.1" = [
-    "a",
-    "c",
-    "b",
+  "a",
+  "c",
+  "b",
 ]
 "list4.1" = [
-    "foo",
+  "foo",
+  [
+    "one",
     [
-        "one",
-        [
-            "up",
-            "mid",
-            "down",
-            100,
-        ],
+      "up",
+      "mid",
+      "down",
+      100,
     ],
+  ],
 ]
 "list2.2" = [
-    "a",
-    "b",
-    "c",
+  "a",
+  "b",
+  "c",
 ]
 "list3.2" = [
-    "a",
-    "c",
-    "b",
+  "a",
+  "c",
+  "b",
 ]
 "list4.2" = [
-    "foo",
+  "foo",
+  [
+    "one",
     [
-        "one",
-        [
-            "up",
-            "mid",
-            "down",
-            100,
-        ],
+      "up",
+      "mid",
+      "down",
+      100,
     ],
+  ],
 ]
 rendered = "some-text-100!"
 only_in_patch = 2
