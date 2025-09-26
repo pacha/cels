@@ -16,6 +16,7 @@ from cels import default
 from cels.exceptions import CelsInputError
 from cels.lib.yaml_parsing import SafePreserveTagLoader
 from cels.lib.yaml_parsing import SafePreserveTagDumper
+from cels.lib.json_dumps import json_dumps
 
 from .patch_dictionary import patch_dictionary
 
@@ -34,18 +35,8 @@ load_parameters: Dict[str, Dict[str, Any]] = {
 
 dump_functions: Dict[str, Callable] = {
     "yaml": yaml.dump,
-    "json": json.dumps,
+    "json": json_dumps,
     "toml": tomli_w.dumps,
-}
-
-dump_parameters: Dict[str, Dict[str, Any]] = {
-    "yaml": {
-        "Dumper": SafePreserveTagDumper,
-        "sort_keys": False,
-        "allow_unicode": True,
-    },
-    "json": {"indent": 2, "ensure_ascii": False},
-    "toml": {},
 }
 
 
@@ -59,6 +50,8 @@ def patch_document(
     patch_format: str,
     patch_text: str,
     output_format: str,
+    indent: int = default.indent,
+    sort_keys: bool = default.sort_keys,
     separator: str = default.separator,
     left_marker: str = default.left_marker,
     index_marker: str = default.index_marker,
@@ -66,9 +59,27 @@ def patch_document(
 ) -> str:
     """Patch a text-based structured document."""
 
+    # all parameters
+    dump_parameters: Dict[str, Dict[str, Any]] = {
+        "yaml": {
+            "Dumper": SafePreserveTagDumper,
+            "indent": indent,
+            "sort_keys": sort_keys,
+            "allow_unicode": True,
+        },
+        "json": {"indent": indent, "sort_keys": sort_keys, "ensure_ascii": False},
+        "toml": {
+            "indent": indent,
+        },
+    }
+
     # get input dictionary
     try:
         parameters = load_parameters[input_format]
+        if "indent" in parameters:
+            parameters["indent"] = indent
+        if "sort_keys" in parameters:
+            parameters["sort_keys"] = sort_keys
         input_dict = load_functions[input_format](input_text, **parameters) or {}
     except KeyError:
         raise CelsInputError(
