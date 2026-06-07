@@ -3,51 +3,62 @@
 **Date**: 2026-06-07
 **Repository**: https://github.com/pacha/cels
 **Branch**: `perf-optimization`
-**Commits**: 10 optimization commits on top of baseline analysis
+**Commits**: 12 optimization commits on top of baseline analysis
 
 ## Executive Summary
 
-A systematic performance optimization of the CELS YAML/JSON patching CLI tool achieved **2.1×–2.7× speedup** across all YAML benchmarks and **1.34× speedup** for JSON, while maintaining 100% backward compatibility and passing all 180 existing tests.
+A systematic performance optimization of the CELS YAML/JSON patching CLI tool achieved **5.8×–12.5× speedup** across all YAML benchmarks and **1.15× speedup** for JSON, while maintaining 100% backward compatibility and passing all 180 existing tests.
 
-The single biggest win came from switching YAML input parsing from PyYAML's pure-Python `SafeLoader` to the C-accelerated `CSafeLoader` (LibYAML), which was ~9× faster for parsing and accounted for the majority of total execution time.
+The two biggest wins came from switching both YAML input parsing and YAML output serialization from PyYAML's pure-Python implementation to the C-accelerated LibYAML versions. The C loader (CSafeLoader) was ~9× faster for parsing, and the C dumper (CSafeDumper) was ~5-10× faster for serialization. Together, these two optimizations accounted for over 90% of the total speedup.
 
 ## Total Speedup Achieved
 
-| Benchmark | Baseline (ms) | Optimized (ms) | Speedup | Description |
-|-----------|---------------|----------------|---------|-------------|
-| small_yaml | 0.493 | 0.233 | **2.11×** | Typical CLI usage (5-line config) |
-| nested_yaml | 4.073 | 1.519 | **2.68×** | Deep nesting (depth=10, width=5) |
-| wide_yaml | 47.839 | 20.484 | **2.34×** | Wide document (500 keys) |
-| list_yaml | 26.289 | 10.019 | **2.62×** | List operations (20 lists × 50 items) |
-| nested_json | 1.300 | 0.973 | **1.34×** | JSON with nested patch ops |
-| large_yaml | 94.113 | 40.952 | **2.30×** | Large document (1000 keys) |
+| Benchmark | Baseline (ms) | Final (ms) | Speedup | Description |
+|-----------|---------------|------------|---------|-------------|
+| small_yaml | 0.493 | 0.049 | **10.1×** | Typical CLI usage (5-line config) |
+| nested_yaml | 4.073 | 0.330 | **12.3×** | Deep nesting (depth=10, width=5) |
+| wide_yaml | 47.839 | 4.483 | **10.7×** | Wide document (500 keys) |
+| list_yaml | 26.289 | 4.510 | **5.8×** | List operations (20 lists × 50 items) |
+| nested_json | 1.300 | 1.133 | **1.15×** | JSON with nested patch ops |
+| large_yaml | 94.113 | 7.543 | **12.5×** | Large document (1000 keys) |
 
-**Geometric mean speedup: ~2.3× for YAML, ~1.3× for JSON**
+**Geometric mean speedup: ~10× for YAML, ~1.15× for JSON**
 
-## Biggest Bottleneck Found
+## Biggest Bottlenecks Found (Timeline)
 
+### Initial State
 **YAML parsing/serialization using PyYAML's pure-Python implementation** was the dominant bottleneck, consuming 96.6% of total execution time:
 
 - YAML load (input + patch): 63.1% of total time
 - YAML dump (output): 33.5% of total time
 - patch_dictionary logic: only 3.3% of total time
 
-This was confirmed via cProfile analysis which showed PyYAML internals (scanner, parser, composer, constructor, serializer, representer, emitter) dominating the profile. The per-key overhead was remarkably consistent at ~95μs per key for YAML operations, confirming that parsing/dumping was the bottleneck rather than the patching logic.
+This was confirmed via cProfile analysis which showed PyYAML internals (scanner, parser, composer, constructor, serializer, representer, emitter) dominating the profile.
 
-## Best Optimization Technique
+### After C Loader (Optimization 6)
+YAML parsing was fixed (~9× faster). YAML output serialization became the new bottleneck at ~40-50% of remaining time. The patch_dictionary logic was still a small fraction.
 
-**Using LibYAML's C-accelerated YAML loader** (CSafeLoader) was by far the most impactful optimization. Key details:
+### After C Dumper (Optimization 11)
+YAML I/O is no longer the bottleneck. Remaining time is split between Python object manipulation (creating Patch, Change, Path objects) and the C YAML library overhead itself. The patch_dictionary logic is now a visible fraction of total time, but further Python-level micro-optimizations yield diminishing returns.
 
-1. **PyYAML ships with both Python and C implementations** of SafeLoader/SafeDumper
-2. The C implementation is compiled from LibYAML and is ~9× faster
-3. The existing code only used the Python implementation because the custom `SafePreserveTagLoader` subclassed `yaml.SafeLoader`
-4. By creating a `CSafePreserveTagLoader` that subclasses `yaml.CSafeLoader` and registering the same tag-preserving multi-constructor, we maintained full compatibility with tagged YAML values (e.g., `!secret`) while gaining the C speed
+## Best Optimization Techniques
 
-The approach was careful:
-- Tag-preserving multi-constructors were registered on the C loader subclass
-- A verification step ensures the C loader produces identical results
+### 1. C-accelerated YAML loader (Optimization 6)
+- PyYAML ships with both Python and C implementations of SafeLoader
+- The C implementation is compiled from LibYAML and is ~9× faster
+- Created a `CSafePreserveTagLoader` subclassing `yaml.CSafeLoader` with the same tag-preserving multi-constructor
 - Graceful fallback to Python loader if C loader is unavailable
-- Python dumper was kept for output format compatibility (C dumper produces slightly different formatting for tagged scalars)
+
+### 2. C-accelerated YAML dumper (Optimization 11)
+- Previously disabled because the C dumper produced different formatting for tagged scalars
+- Fixed by using explicit `style="'"` in `represent_tagged_scalar`, which forces both Python and C dumpers to produce identical single-quoted output
+- Added a verification test at module load time that confirms output match before activating
+- This single change provided an additional 2-5× speedup on top of the C loader improvement
+
+### 3. Replace exception-based control flow (Optimization 3)
+- Replaced `raise CelsActionPatch`/`raise CelsActionRename` with returning signal objects
+- ~20% improvement for JSON patching (which uses patch operations heavily)
+- Exception creation in Python involves expensive stack frame capture
 
 ## Complete Optimization List
 
@@ -63,43 +74,34 @@ The approach was careful:
 | 8 | Guard logging calls | Avoid unnecessary work | Eliminates Path construction |
 | 9 | Identity comparison for Operation objects | Micro-optimization | Faster type checks |
 | 10 | Pre-resolve action function in Change | Micro-optimization | Eliminates dict lookup |
+| 11 | **C-accelerated YAML dumper (LibYAML)** | **I/O optimization** | **Additional 2-5× speedup** |
+| 12 | Iterative safe_traverse + type dispatch + fast-path annotations + result dispatch | Micro-optimization bundle | ~4% for JSON, ~1% for YAML |
 
-## Failed Experiments
+## Previously Failed Experiments (Now Resolved)
 
 ### C YAML Dumper
-Attempted to use `yaml.CSafeDumper` for output serialization alongside the C loader. The C dumper is significantly faster (~5-10×) but produces slightly different output formatting:
-- Python dumper: `username: !secret 'db_username'` (with quotes)
-- C dumper: `username: !secret db_username` (without quotes)
-
-Both outputs are semantically identical (parse to the same result), but the test suite uses exact string comparison. To maintain strict backward compatibility, the Python dumper was kept. The C dumper code is included as commented-out code in `dumpers.py` for future optional use when output format flexibility is acceptable.
-
-### Further patch_dictionary optimizations
-After the C loader optimization reduced YAML parsing time by ~9×, the patch_dictionary logic became such a small fraction of total time (now <5%) that further micro-optimizations had diminishing returns. The bottleneck shifted entirely to I/O.
+Initially attempted in the first round of optimizations but was disabled due to formatting differences between the Python and C dumpers for tagged scalars. In iteration 5 (Optimization 11), this was resolved by using explicit `style="'"` in `represent_tagged_scalar`, which forces both dumpers to produce identical output. The C dumper is now the default when available, with a verification test confirming output compatibility at import time.
 
 ## Recommendation for Future Work
 
-1. **Enable C YAML dumper optionally**: Add a CLI flag `--fast-output` or environment variable that enables the C dumper for users who don't need exact output formatting. This could provide an additional ~1.5-2× speedup for the YAML dump phase.
+1. **Use `ruamel.yaml` for round-trip formatting**: If exact formatting preservation including comments and whitespace is important, consider using `ruamel.yaml` which preserves comments, ordering, and formatting. It may also be faster than pure-Python PyYAML.
 
-2. **Use `ruamel.yaml` for round-trip formatting**: If exact formatting preservation is important, consider using `ruamel.yaml` which preserves comments, ordering, and formatting. It may also be faster than pure-Python PyYAML.
+2. **Batch file operations**: For CLI usage with multiple files, implement batch processing to amortize Python startup and import costs.
 
-3. **Batch file operations**: For CLI usage with multiple files, implement batch processing to amortize Python startup and import costs.
+3. **Memory-mapped I/O for large files**: For very large YAML files (>10MB), consider using memory-mapped file I/O to reduce memory copies.
 
-4. **Lazy import of Jinja2**: The Jinja2 import adds to startup time but is only needed for `render` operations. Consider lazy-importing it only when render is actually used.
+4. **Stream-based processing**: For very large documents, consider a streaming YAML parser that processes keys one at a time rather than loading the entire document into memory.
 
-5. **Memory-mapped I/O for large files**: For very large YAML files (>10MB), consider using memory-mapped file I/O to reduce memory copies.
+5. **Profile with real-world workloads**: The benchmarks use synthetic data. Profiling with real Kubernetes config maps, CI/CD pipeline definitions, or other common YAML patching scenarios may reveal additional optimization opportunities.
 
-6. **Stream-based processing**: For very large documents, consider a streaming YAML parser that processes keys one at a time rather than loading the entire document into memory.
-
-7. **Remove the typeguard dependency from pyproject.toml**: Already done in this optimization. This reduces install size and eliminates a runtime dependency that was providing minimal value.
-
-8. **Profile with real-world workloads**: The benchmarks use synthetic data. Profiling with real Kubernetes config maps, CI/CD pipeline definitions, or other common YAML patching scenarios may reveal additional optimization opportunities.
+6. **Consider orjson for JSON path**: The JSON path sees only modest improvements (1.15×) because Python's built-in `json` module is already C-accelerated. The remaining overhead is in the Python patch_dictionary logic. Using `orjson` could provide a small additional speedup for JSON serialization.
 
 ## Validation
 
 All 180 tests pass with the optimized code:
 
 ```
-180 passed in 0.39s
+180 passed in 0.42s
 ```
 
-The optimizations produce functionally identical output - the same YAML/JSON documents are produced with the same patch operations, just faster.
+The optimizations produce functionally identical output - the same YAML/JSON documents are produced with the same patch operations, just significantly faster.

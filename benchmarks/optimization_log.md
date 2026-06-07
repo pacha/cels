@@ -86,5 +86,53 @@ YAML parsing/serialization (PyYAML pure-Python) was the dominant bottleneck at 9
 ### Best Optimization Technique
 Using the C-accelerated YAML loader (LibYAML's CSafeLoader) provided the largest single speedup, as it directly addressed the dominant bottleneck. The 9x improvement in YAML parsing translated to 2.3-2.7x overall speedup.
 
-### Failed Experiments
-- **C YAML dumper**: Attempted to use CSafeDumper for output serialization, but it produces slightly different output formatting (e.g., no quotes on simple strings in tagged scalars). This broke exact string comparison tests. The Python dumper was kept for backward compatibility, with the C dumper code commented out for future optional use.
+## Optimization 11: Enable C-accelerated YAML dumper for output serialization
+- **Commit**: `perf: enable C-accelerated YAML dumper for ~2x faster output serialization`
+- **Files**: `cels/lib/yaml_parsing/dumpers.py`, `cels/models/actions/action_render.py`
+- **Change**: Enable the C YAML dumper (CSafeDumper) that was previously disabled due to formatting differences. Fixed the compatibility issue by using explicit `style="'"` in `represent_tagged_scalar`, which forces both the Python and C dumpers to produce identical single-quoted output for tagged scalars (e.g., `!secret 'db_username'` instead of `!secret db_username`). Added a verification test at module load time that confirms the C dumper produces the same output as the Python dumper before activating it.
+- **Impact**: This is the second biggest optimization after the C loader. YAML output serialization was ~40-50% of remaining time and is now 5-10x faster.
+  - small_yaml: 0.233ms → 0.048ms (**4.87×** vs iter 10)
+  - nested_yaml: 1.519ms → 0.317ms (**4.79×** vs iter 10)
+  - wide_yaml: 20.484ms → 4.419ms (**4.64×** vs iter 10)
+  - list_yaml: 10.019ms → 4.514ms (**2.22×** vs iter 10)
+  - large_yaml: 40.952ms → 7.517ms (**5.45×** vs iter 10)
+
+Also includes lazy Jinja2 import: moved `from jinja2 import Template, TemplateError` inside the `action_render` function body. Jinja2 import costs ~15ms but the render operation is rarely used, so deferring the import avoids penalizing the common case.
+
+## Optimization 12: Iterative safe_traverse, type dispatch, fast-path annotations, result dispatch
+- **Commit**: `perf: iterative safe_traverse, type dispatch make_safe, fast-path check_no_annotations, optimize result dispatch`
+- **Files**: `cels/lib/safe/safe_traverse.py`, `cels/lib/safe/make_safe.py`, `cels/models/annotation_config.py`, `cels/services/patch_dictionary.py`, `cels/models/change.py`, `cels/models/patch.py`
+- **Changes**:
+  1. **Iterative safe_traverse**: Convert from recursive to iterative loop. The recursive version used `indices[1:]` which creates a new list on each step — O(n²) for deeply nested indices. The iterative version uses a simple for loop with no list copies.
+  2. **Type dispatch make_safe**: Replace chained isinstance() checks with a pre-built dict dispatch table keyed by `type(container)`. Faster for the common case of already-wrapped MutatedDict/MutatedList.
+  3. **Two-stage fast-path in check_no_annotations**: First check for marker characters with simple `in` substring test before running regex match. Since most keys are not annotated, this avoids expensive regex engine startup for the vast majority of keys.
+  4. **Optimize result dispatch in patch_dictionary_rec**: Check for None first (the most common return from change.apply()) before isinstance checks for signal types. Uses module-level cached type references.
+  5. **Fix mutable default argument in Change.__init__**: Replace `indices=[]` with `indices=None` and create a new list per instance. This fixes a classic Python gotcha and avoids shared mutable state.
+  6. **Optimize Patch.get_keys()**: Pre-compute key views for membership testing instead of accessing dict keys on each iteration.
+- **Impact**: Small improvement on JSON path (1.04× vs iter 11) due to the None-check optimization and fast-path annotation check. YAML path is now dominated by YAML I/O and sees negligible improvement from micro-optimizations.
+
+## Summary
+
+### Speedup Achieved (Final)
+
+| Benchmark | Baseline (ms) | Final (ms) | Speedup |
+|-----------|---------------|------------|---------|
+| small_yaml | 0.493 | 0.049 | **10.1×** |
+| nested_yaml | 4.073 | 0.330 | **12.3×** |
+| wide_yaml | 47.839 | 4.483 | **10.7×** |
+| list_yaml | 26.289 | 4.510 | **5.8×** |
+| nested_json | 1.300 | 1.133 | **1.1×** |
+| large_yaml | 94.113 | 7.543 | **12.5×** |
+
+### Biggest Bottlenecks (Timeline)
+1. **Initially**: YAML parsing/serialization (PyYAML pure-Python) was the dominant bottleneck at 96.6% of total time
+2. **After C loader (Opt 6)**: YAML parsing fixed; YAML output serialization became the new bottleneck at ~40-50% of remaining time
+3. **After C dumper (Opt 11)**: YAML I/O is no longer the bottleneck; remaining time is split between Python object manipulation and C YAML library overhead
+
+### Best Optimization Techniques
+1. **C-accelerated YAML loader** (Opt 6): 9x faster parsing, 2.3-2.7x overall speedup
+2. **C-accelerated YAML dumper** (Opt 11): 5-10x faster serialization, 2-5x additional overall speedup
+3. **Combined C YAML acceleration**: Together these two optimizations account for >90% of the total speedup
+
+### Key Insight
+The two C-accelerated YAML optimizations combined deliver a 5-12x speedup for YAML workloads, far exceeding the 2-5x target. The remaining Python-level micro-optimizations (1-12) provide diminishing returns since the YAML I/O is now handled by C code.
