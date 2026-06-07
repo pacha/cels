@@ -11,8 +11,28 @@ from .change import Change
 from .key_location import KeyLocation
 from .annotated_key import AnnotatedKey
 from .annotation_config import AnnotationConfig
+from .operation import Operation
 from cels.exceptions import CelsInputError
 from cels.lib.show import show_type
+
+# Lazy-loaded operation references (populated on first use to avoid
+# import ordering issues with Operation registry)
+_var_operation = None
+_change_operation = None
+
+
+def _get_var_operation():
+    global _var_operation
+    if _var_operation is None:
+        _var_operation = Operation.get("var")
+    return _var_operation
+
+
+def _get_change_operation():
+    global _change_operation
+    if _change_operation is None:
+        _change_operation = Operation.get("change")
+    return _change_operation
 
 
 @dataclass
@@ -51,7 +71,8 @@ class Patch:
                 raise CelsInputError(f"{self.path + key}: {err}")
             self.data[annotated_key.key] = []
             for change in changes:
-                if change.operation == "var":
+                # Use identity comparison with pre-fetched Operation object
+                if change.operation is _get_var_operation():
                     self.vars[annotated_key.key] = change.value
                 else:
                     self.data[annotated_key.key].append(change)
@@ -73,7 +94,7 @@ class Patch:
             return [change]
 
         # 'change' operation allows to specify the changes explicitly
-        if annotation.operation == "change":
+        if annotation.operation is _get_change_operation():
             if not isinstance(value, list):
                 raise CelsInputError(
                     "A change operation takes a list of dictionaries as parameter. "
