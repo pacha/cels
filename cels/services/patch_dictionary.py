@@ -65,18 +65,20 @@ def patch_dictionary_rec(
 
         # patch by applying all changes
         for change in patch[key]:
-            try:
-                change.apply(output_dict, key, patch, path, root_input_dict)
-            except CelsActionPatch as exc:
-                exc.tail_container[exc.tail_index] = patch_dictionary_rec(
-                    path=exc.tail_path,
+            result = change.apply(output_dict, key, patch, path, root_input_dict)
+
+            # Handle patch signal: recurse into nested dictionary
+            if isinstance(result, CelsActionPatch):
+                result.tail_container[result.tail_index] = patch_dictionary_rec(
+                    path=result.tail_path,
                     parent_patch=patch,
-                    input_dict=exc.input_dict,
-                    patch_dict=exc.patch_dict,
+                    input_dict=result.input_dict,
+                    patch_dict=result.patch_dict,
                     root_input_dict=root_input_dict,
                     annotation_config=annotation_config,
                 )
-            except CelsActionRename:
+            # Handle rename signal: rename the key in output_dict
+            elif result is CelsActionRename:
                 output_dict[change.value] = output_dict[key]
                 del output_dict[key]
                 key = change.value

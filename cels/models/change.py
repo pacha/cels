@@ -106,7 +106,7 @@ class Change:
         return f"{{{self.operation.name}{index_str}}}"
 
     def apply(self, output_dict, key, patch, path, root_input_dict):
-        """Apply operation at key."""
+        """Apply operation at key and return any action signal."""
 
         # find operation
         if self.operation:
@@ -118,8 +118,8 @@ class Change:
         # find action
         action = actions[operation_name]
 
-        # apply action
-        action(
+        # apply action and return result (may be a signal object like CelsActionPatch)
+        return action(
             container=output_dict,
             key=key,
             indices=self.indices,
