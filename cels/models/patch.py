@@ -117,18 +117,28 @@ class Patch:
     def get_keys(
         self, input_dict: dict
     ) -> Generator[Tuple[Any, KeyLocation], None, None]:
-        """Return all keys with their corresponding locations."""
+        """Return all keys with their corresponding locations.
+
+        Pre-computes the key sets for both input and patch dictionaries to
+        avoid repeated per-key membership checks. For large documents with
+        many keys, this is more cache-friendly and reduces the overhead of
+        dict.__contains__ lookups.
+        """
+        data = self.data
+        # Pre-compute patch key views for fast membership testing
+        data_keys = data.keys()
+        input_keys = input_dict.keys()
 
         # classify input keys
-        for key in input_dict:
-            if key not in self.data:
-                yield key, KeyLocation.only_input
-            else:
+        for key in input_keys:
+            if key in data_keys:
                 yield key, KeyLocation.in_both
+            else:
+                yield key, KeyLocation.only_input
 
-        # classify new keys
-        for key in self.data:
-            if key not in input_dict:
+        # classify new keys (only in patch, not in input)
+        for key in data_keys:
+            if key not in input_keys:
                 yield key, KeyLocation.only_patch
 
     def get_all_vars(self):

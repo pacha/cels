@@ -71,8 +71,14 @@ class Change:
         self,
         operation: Union[Operation, None],
         value: Any = None,
-        indices: List[Union[int, None]] = [],
+        indices: Union[List[Union[int, None]], None] = None,
     ):
+        # Fix mutable default argument: use None and create a new list per instance.
+        # The previous `indices=[]` was a classic Python gotcha where the same list
+        # object was shared across all Change instances that used the default.
+        if indices is None:
+            indices = []
+
         if operation:
             # check that the value type matches the allowed types
             if not _check_value_type(value, operation.value_type):

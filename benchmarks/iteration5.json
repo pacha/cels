@@ -1,0 +1,110 @@
+{
+  "small_yaml": {
+    "timing": {
+      "mean": 4.7761455011823276e-05,
+      "median": 4.674549995797861e-05,
+      "stdev": 3.318689924967674e-06,
+      "min": 4.295600001569255e-05,
+      "max": 6.10279998909391e-05,
+      "iterations": 200,
+      "total": 0.009552291002364655
+    },
+    "memory": {
+      "current_mb": 0.00066375732421875,
+      "peak_mb": 0.004955291748046875
+    },
+    "description": "Small YAML document (typical CLI usage)"
+  },
+  "nested_yaml": {
+    "timing": {
+      "mean": 0.00031728983997709293,
+      "median": 0.00031726299994261353,
+      "stdev": 6.261959563999258e-06,
+      "min": 0.00030625299996245303,
+      "max": 0.00033035600017683464,
+      "iterations": 50,
+      "total": 0.015864491998854646
+    },
+    "memory": {
+      "current_mb": 0.00457763671875,
+      "peak_mb": 0.022996902465820312
+    },
+    "description": "Deeply nested YAML document (depth=10, width=5) with set operations"
+  },
+  "wide_yaml": {
+    "timing": {
+      "mean": 0.004419027260037183,
+      "median": 0.00415357000019867,
+      "stdev": 0.0012458732700833769,
+      "min": 0.004044795000027079,
+      "max": 0.010665963000064949,
+      "iterations": 50,
+      "total": 0.22095136300185914
+    },
+    "memory": {
+      "current_mb": 0.0043487548828125,
+      "peak_mb": 0.3781137466430664
+    },
+    "description": "Wide YAML document (500 top-level keys) with set operations"
+  },
+  "list_yaml": {
+    "timing": {
+      "mean": 0.004514446180010055,
+      "median": 0.0043829980002101365,
+      "stdev": 0.0008596293050434606,
+      "min": 0.0042592909999257245,
+      "max": 0.010445296999932907,
+      "iterations": 50,
+      "total": 0.22572230900050272
+    },
+    "memory": {
+      "current_mb": 0.0055389404296875,
+      "peak_mb": 0.3777475357055664
+    },
+    "description": "YAML with lists (20 lists x 50 items) with indexed set operations"
+  },
+  "nested_json": {
+    "timing": {
+      "mean": 0.0011836907999986579,
+      "median": 0.0011772650000239082,
+      "stdev": 3.5963309502318564e-05,
+      "min": 0.0011207799998373957,
+      "max": 0.0012918780003019492,
+      "iterations": 50,
+      "total": 0.059184539999932895
+    },
+    "memory": {
+      "current_mb": 0.025496482849121094,
+      "peak_mb": 0.3233928680419922
+    },
+    "description": "JSON document (200 keys, depth=5) with patch and set operations"
+  },
+  "large_yaml": {
+    "timing": {
+      "mean": 0.007517407799991815,
+      "median": 0.006903342499981591,
+      "stdev": 0.0018620140374512018,
+      "min": 0.006760966000001645,
+      "max": 0.013579507000031299,
+      "iterations": 20,
+      "total": 0.1503481559998363
+    },
+    "memory": {
+      "current_mb": 0.09981536865234375,
+      "peak_mb": 0.7863092422485352
+    },
+    "description": "Large YAML document (1000 top-level keys) with set operations"
+  },
+  "import_time": {
+    "timing": {
+      "mean": 6.333805006306648e-05,
+      "median": 6.045600002835272e-05,
+      "stdev": 7.120730715914556e-06,
+      "min": 5.6661000144231366e-05,
+      "max": 8.511900023222552e-05,
+      "iterations": 20,
+      "total": 0.0012667610012613295
+    },
+    "description": "Module import/reload time"
+  }
+}

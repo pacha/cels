@@ -14,6 +14,10 @@ from cels.exceptions import CelsActionRename
 # Check logging level once to avoid per-call overhead in hot loop
 _log_info_enabled = log.isEnabledFor(logging.INFO)
 
+# Cache the type for fast isinstance checks in the hot loop
+_CelsActionPatch = CelsActionPatch
+_CelsActionRename = CelsActionRename
+
 
 def patch_dictionary(
     input_dict: dict,
@@ -72,8 +76,13 @@ def patch_dictionary_rec(
         for change in patch[key]:
             result = change.apply(output_dict, key, patch, path, root_input_dict)
 
-            # Handle patch signal: recurse into nested dictionary
-            if isinstance(result, CelsActionPatch):
+            # Optimize result type dispatch: the most common case is result
+            # being None (set, delete, insert, extend, keep, etc.), so check
+            # for that first with a simple truthiness test. Only then check
+            # for the rarer signal types (CelsActionPatch, CelsActionRename).
+            if result is None:
+                continue
+            if isinstance(result, _CelsActionPatch):
                 result.tail_container[result.tail_index] = patch_dictionary_rec(
                     path=result.tail_path,
                     parent_patch=patch,
@@ -82,8 +91,7 @@ def patch_dictionary_rec(
                     root_input_dict=root_input_dict,
                     annotation_config=annotation_config,
                 )
-            # Handle rename signal: rename the key in output_dict
-            elif result is CelsActionRename:
+            elif result is _CelsActionRename:
                 output_dict[change.value] = output_dict[key]
                 del output_dict[key]
                 key = change.value
