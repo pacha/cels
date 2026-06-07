@@ -4,14 +4,61 @@ from typing import Union
 from dataclasses import field
 from dataclasses import dataclass
 
-from typeguard import check_type
-from typeguard import TypeCheckError
-
 from .actions import actions
 from .operation import Operation
 from cels.lib.show import show
 from cels.lib.show import show_type
 from cels.exceptions import CelsInputError
+
+
+def _check_value_type(value, value_type) -> bool:
+    """Lightweight type check replacing typeguard.check_type.
+
+    Returns True if value matches the expected type, False otherwise.
+    This avoids the significant overhead of typeguard's runtime introspection.
+    """
+    # Any type always passes
+    if value_type is Any:
+        return True
+
+    # Simple types
+    if value_type is str:
+        return isinstance(value, str)
+    if value_type is dict:
+        return isinstance(value, dict)
+    if value_type is list:
+        return isinstance(value, list)
+
+    # Union types (e.g., Union[str, int, bool, None])
+    origin = getattr(value_type, "__origin__", None)
+    if origin is Union:
+        args = value_type.__args__
+        for arg in args:
+            if arg is type(None):
+                if value is None:
+                    return True
+            elif isinstance(value, arg):
+                return True
+        return False
+
+    # Generic list types (e.g., List[Dict[str, Any]])
+    if origin is list:
+        if not isinstance(value, list):
+            return False
+        # Check element types for List[Dict[str, Any]]
+        args = getattr(value_type, "__args__", ())
+        if args and value:
+            elem_type = args[0]
+            elem_origin = getattr(elem_type, "__origin__", None)
+            if elem_origin is dict:
+                return all(isinstance(item, dict) for item in value)
+        return True
+
+    # Fallback: use isinstance for other types
+    try:
+        return isinstance(value, value_type)
+    except TypeError:
+        return True
 
 
 @dataclass
@@ -27,10 +74,8 @@ class Change:
         indices: List[Union[int, None]] = [],
     ):
         if operation:
-            # chech that the value type matches the allowed types
-            try:
-                check_type(value, operation.value_type)
-            except TypeCheckError:
+            # check that the value type matches the allowed types
+            if not _check_value_type(value, operation.value_type):
                 raise CelsInputError(
                     f"Cannot execute operation {show(operation)} with value {show(value)}. "
                     f"This operation requires a value of type {show_type(operation.value_type)}"

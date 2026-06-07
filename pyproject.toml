@@ -23,7 +23,6 @@ dependencies = [
     "rich>=13.5.2",
     "tomli>=2.0.1",
     "tomli_w>=1.0.0",
-    "typeguard>=4.0.0",
 ]
 
 [project.urls]
