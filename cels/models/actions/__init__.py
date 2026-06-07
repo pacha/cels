@@ -1,3 +1,5 @@
+import logging
+
 from cels.logs import log
 from cels.exceptions import CelsInputError
 
@@ -5,19 +7,30 @@ from cels.exceptions import CelsInputError
 # (ensures that all exceptions show the path where they happened)
 action_name_prefix_length = len("action_")
 
+# Check logging level once to avoid per-call overhead
+_log_info_enabled = log.isEnabledFor(logging.INFO)
+
 
 def action(action_func):
+    action_name = action_func.__name__[action_name_prefix_length:]
+
     def wrapped_func(
         container, key, indices, change_value, patch, path, root_input_dict
     ):
-        new_path = (path + key).append(indices)
-        action_name = action_func.__name__[action_name_prefix_length:]
-        log.info(f"{new_path} [cyan]{{{action_name}}}[/]", extra={"markup": True})
+        # Only construct the path string when needed (logging or error)
+        new_path = None
+
+        if _log_info_enabled:
+            new_path = (path + key).append(indices)
+            log.info(f"{new_path} [cyan]{{{action_name}}}[/]", extra={"markup": True})
+
         try:
             return action_func(
                 container, key, indices, change_value, patch, path, root_input_dict
             )
         except CelsInputError as err:
+            if new_path is None:
+                new_path = (path + key).append(indices)
             raise CelsInputError(f"{new_path} {{{action_name}}}: {err}")
 
     return wrapped_func

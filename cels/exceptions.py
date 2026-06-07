@@ -32,7 +32,11 @@ class CelsActionException(CelsException):
 
 
 class CelsActionPatch(CelsActionException):
-    """Patch action exception."""
+    """Patch action exception.
+
+    Note: Also used as a signal object (not raised) for performance.
+    When used as a signal, it is returned from action_patch instead of raised.
+    """
 
     def __init__(self, tail_container, tail_index, tail_path, input_dict, patch_dict):
         self.tail_container = tail_container
@@ -43,6 +47,10 @@ class CelsActionPatch(CelsActionException):
 
 
 class CelsActionRename(CelsActionException):
-    """Rename action exception."""
+    """Rename action exception.
+
+    Note: Also used as a signal (not raised) for performance.
+    When used as a signal, it is returned from action_rename instead of raised.
+    """
 
     pass

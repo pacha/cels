@@ -7,7 +7,7 @@ from . import action
 def action_rename(
     output_dict, key, indices, change_value, patch, path, root_input_dict
 ):
-    """Raise exception to notify a key rename."""
+    """Return signal to notify a key rename."""
 
     # check that key is present
     if key not in output_dict:
@@ -16,4 +16,5 @@ def action_rename(
         )
 
     # signal the calling code to rename the key
-    raise CelsActionRename
+    # Return signal instead of raising exception for performance.
+    return CelsActionRename

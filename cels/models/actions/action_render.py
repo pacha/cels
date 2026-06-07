@@ -1,6 +1,3 @@
-from jinja2 import Template
-from jinja2 import TemplateError
-
 from cels.models import Path
 from cels.exceptions import CelsInputError
 from cels.lib.safe import safe_set
@@ -13,6 +10,11 @@ def action_render(
     output_dict, key, indices, change_value, patch, path, root_input_dict
 ):
     """Render a template using variables defined in the patch dictionary."""
+
+    # Lazy import Jinja2 to avoid the ~15ms import cost on every CLI invocation.
+    # The 'render' operation is rarely used, so deferring the import until
+    # actually needed avoids penalizing the common case.
+    from jinja2 import Template, TemplateError
 
     def get(path: str):
         """Get a value from the input dict given a dotted-notation path."""

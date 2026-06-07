@@ -19,7 +19,9 @@ def action_patch(output_dict, key, indices, change_value, patch, path, root_inpu
 
     tail_path = (path + key).append(indices)
 
-    raise CelsActionPatch(
+    # Return signal object instead of raising exception for performance.
+    # The caller (Change.apply / patch_dictionary_rec) handles this return value.
+    return CelsActionPatch(
         tail_container=tail_container,
         tail_index=tail_index,
         tail_path=tail_path,

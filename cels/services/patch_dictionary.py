@@ -1,4 +1,5 @@
 from typing import Optional
+import logging
 
 from cels import default
 from cels.logs import log
@@ -9,6 +10,13 @@ from cels.models import AnnotationConfig
 from cels.exceptions import CelsInputError
 from cels.exceptions import CelsActionPatch
 from cels.exceptions import CelsActionRename
+
+# Check logging level once to avoid per-call overhead in hot loop
+_log_info_enabled = log.isEnabledFor(logging.INFO)
+
+# Cache the type for fast isinstance checks in the hot loop
+_CelsActionPatch = CelsActionPatch
+_CelsActionRename = CelsActionRename
 
 
 def patch_dictionary(
@@ -60,23 +68,30 @@ def patch_dictionary_rec(
 
         # if only in input_dict, then nothing to process
         if location == KeyLocation.only_input:
-            log.info(f"{path + key} [cyan]{{keep}}[/]", extra={"markup": True})
+            if _log_info_enabled:
+                log.info(f"{path + key} [cyan]{{keep}}[/]", extra={"markup": True})
             continue
 
         # patch by applying all changes
         for change in patch[key]:
-            try:
-                change.apply(output_dict, key, patch, path, root_input_dict)
-            except CelsActionPatch as exc:
-                exc.tail_container[exc.tail_index] = patch_dictionary_rec(
-                    path=exc.tail_path,
+            result = change.apply(output_dict, key, patch, path, root_input_dict)
+
+            # Optimize result type dispatch: the most common case is result
+            # being None (set, delete, insert, extend, keep, etc.), so check
+            # for that first with a simple truthiness test. Only then check
+            # for the rarer signal types (CelsActionPatch, CelsActionRename).
+            if result is None:
+                continue
+            if isinstance(result, _CelsActionPatch):
+                result.tail_container[result.tail_index] = patch_dictionary_rec(
+                    path=result.tail_path,
                     parent_patch=patch,
-                    input_dict=exc.input_dict,
-                    patch_dict=exc.patch_dict,
+                    input_dict=result.input_dict,
+                    patch_dict=result.patch_dict,
                     root_input_dict=root_input_dict,
                     annotation_config=annotation_config,
                 )
-            except CelsActionRename:
+            elif result is _CelsActionRename:
                 output_dict[change.value] = output_dict[key]
                 del output_dict[key]
                 key = change.value
