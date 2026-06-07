@@ -8,6 +8,13 @@ from cels.lib.show import show
 from cels.exceptions import CelsInputError
 from .operation import Operation
 
+# Cache compiled annotation regex patterns by index_marker to avoid
+# re-compiling the same pattern for every annotated key.
+_annotation_regex_cache: dict = {}
+
+# Pre-compiled regex for extracting indices from the index portion.
+_index_pattern = re.compile(r"-?[0-9]+|_")
+
 
 @dataclass
 class Annotation:
@@ -19,11 +26,18 @@ class Annotation:
 
     def __init__(self, raw_annotation: str, index_marker: str = default.index_marker):
         # extract parts from the raw annotation string
-        self.index_marker = re.escape(index_marker)
-        operation_pattern = r"([a-z_]+)"
-        index_pattern = r"((?: *_ *)|(?: *-?[0-9]+ *(?:, *-?[0-9]+ *)*(?:, *_ *)?))"
-        pattern = f"^{operation_pattern}(?:{self.index_marker}{index_pattern})?$"
-        regex = re.compile(pattern)
+        escaped_marker = re.escape(index_marker)
+        self.index_marker = escaped_marker
+
+        # Use cached regex if available, otherwise compile and cache it
+        regex = _annotation_regex_cache.get(escaped_marker)
+        if regex is None:
+            operation_pattern = r"([a-z_]+)"
+            index_pattern = r"((?: *_ *)|(?: *-?[0-9]+ *(?:, *-?[0-9]+ *)*(?:, *_ *)?))"
+            pattern = f"^{operation_pattern}(?:{escaped_marker}{index_pattern})?$"
+            regex = re.compile(pattern)
+            _annotation_regex_cache[escaped_marker] = regex
+
         result = regex.match(raw_annotation)
         if not result:
             raise CelsInputError(
@@ -45,8 +59,7 @@ class Annotation:
 
         # set indices
         index_str = result.group(2) or ""
-        index_pattern = r"-?[0-9]+|_"
-        indices_list = re.findall(index_pattern, index_str)
+        indices_list = _index_pattern.findall(index_str)
         self.indices = []
         if indices_list:
             # check that the operation takes indices
