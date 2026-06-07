@@ -7,6 +7,9 @@ from cels.exceptions import CelsInputError
 
 special_chars_pattern = re.compile(r"\.|\[|\]")
 
+# Characters that need escaping in path expressions
+_SPECIAL_CHARS = frozenset(".[]")
+
 
 @dataclass
 class Path:
@@ -54,9 +57,9 @@ class Path:
         else:
             left_separator, right_separator = ".", ""
 
-        # get escape characters
+        # get escape characters - avoid regex for simple keys
         part_str = str(part) if part is not None else "_"
-        if special_chars_pattern.search(part_str):
+        if any(c in _SPECIAL_CHARS for c in part_str):
             left_escape, right_escape = '"', '"'
         else:
             left_escape, right_escape = "", ""
