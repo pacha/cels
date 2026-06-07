@@ -1,4 +1,5 @@
 from typing import Optional
+import logging
 
 from cels import default
 from cels.logs import log
@@ -9,6 +10,9 @@ from cels.models import AnnotationConfig
 from cels.exceptions import CelsInputError
 from cels.exceptions import CelsActionPatch
 from cels.exceptions import CelsActionRename
+
+# Check logging level once to avoid per-call overhead in hot loop
+_log_info_enabled = log.isEnabledFor(logging.INFO)
 
 
 def patch_dictionary(
@@ -60,7 +64,8 @@ def patch_dictionary_rec(
 
         # if only in input_dict, then nothing to process
         if location == KeyLocation.only_input:
-            log.info(f"{path + key} [cyan]{{keep}}[/]", extra={"markup": True})
+            if _log_info_enabled:
+                log.info(f"{path + key} [cyan]{{keep}}[/]", extra={"markup": True})
             continue
 
         # patch by applying all changes
