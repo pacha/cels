@@ -91,6 +91,12 @@ class Change:
         self.value = value
         self.indices = indices
 
+        # Pre-resolve the action function to avoid dict lookup at apply time
+        if operation:
+            self._action = actions.get(operation.name)
+        else:
+            self._action = None
+
     @classmethod
     def from_dict(cls, data: dict):
         """Create instance from dictionary"""
@@ -153,15 +159,16 @@ class Change:
     def apply(self, output_dict, key, patch, path, root_input_dict):
         """Apply operation at key and return any action signal."""
 
-        # find operation
-        if self.operation:
-            operation_name = self.operation.name
-        else:
-            patch_value_is_dict = isinstance(self.value, dict)
-            operation_name = "patch" if patch_value_is_dict else "set"
-
-        # find action
-        action = actions[operation_name]
+        # Use pre-resolved action if available, otherwise resolve now
+        action = self._action
+        if action is None:
+            # Determine operation name for unannotated keys
+            if self.operation:
+                action = actions[self.operation.name]
+            else:
+                patch_value_is_dict = isinstance(self.value, dict)
+                operation_name = "patch" if patch_value_is_dict else "set"
+                action = actions[operation_name]
 
         # apply action and return result (may be a signal object like CelsActionPatch)
         return action(
